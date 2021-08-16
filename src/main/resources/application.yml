@@ -1,0 +1,34 @@
+micronaut:
+  application:
+    name: ${project.artifactId}
+
+  metrics:
+    enabled: true
+    export:
+      prometheus:
+        step: PT2s
+        descriptions: false
+
+  http:
+    services:
+      broker:
+        path: ngsi-ld/v1
+        url: http://localhost:1026
+
+---
+endpoints:
+  metrics:
+    enabled: true
+  health:
+    enabled: true
+
+loggers:
+  levels:
+    ROOT: TRACE
+    io:
+      micronaut:
+        http:
+          client: TRACE
+---
+general:
+  contextUrl: https://smartdatamodels.org/context.jsonld

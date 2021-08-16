@@ -1,0 +1,35 @@
+openapi: 3.0.3
+info:
+  description: 'The spec describes the so-called API for the DN payment service'
+  version: latest
+  title: DN Payment API
+  contact:
+    email: stefan.wiedemann@fiware.org
+
+paths:
+  '/api/payment':
+    post:
+      description: Post payment.
+      operationId: post payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Command'
+      responses:
+        '204':
+          description: Successfully did something in regards of payment
+
+components:
+  schemas:
+    Command:
+      type: object
+      description: The so called command.
+      properties:
+        command:
+          type: string
+        properties:
+          type: object
+        Data:
+          type: object

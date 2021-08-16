@@ -1,0 +1,372 @@
+openapi: 3.0.3
+info:
+  description: 'The spec describes the API for the contract service'
+  version: latest
+  title: Contract Service API
+  contact:
+    email: stefan.wiedemann@fiware.org
+tags:
+  - name: Contract
+    description: Contract focused information
+  - name: Offer
+    description: Offer focused information
+  - name: Organization
+    description: Organization focused information
+  - name: SmartService
+    description: Api for smart services.
+  - name: Order
+    description: All order focused information
+paths:
+  '/organization':
+    get:
+      tags:
+        - Organization
+      description: Get all organizations.
+      operationId: getOrganizations
+      responses:
+        '200':
+          description: List of organizations.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Organization'
+    post:
+      tags:
+        - Organization
+      description: Create organization.
+      operationId: createOrganization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Organization'
+      responses:
+        '201':
+          description: Successfully created organization.
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              description: Id of the created organization.
+  '/organization/{id}':
+    get:
+      tags:
+        - Organization
+      parameters:
+        - $ref: '#/components/parameters/id'
+      description: Get organization by id
+      operationId: getOrganizationById
+      responses:
+        '200':
+          description: Retrieve the requested organization.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        '404':
+          description: Not Found
+
+  '/offer':
+    get:
+      tags:
+        - Offer
+      description: Get all available offers
+      operationId: getOffers
+      responses:
+        '200':
+          description: List of offers.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Offer'
+    post:
+      tags:
+        - Offer
+      description: Create a new offer
+      operationId: createOffer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Offer'
+      responses:
+        '201':
+          description: Successfully created offer.
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              description: Id of the created offer.
+  '/offer/{id}':
+    get:
+      tags:
+        - Offer
+      parameters:
+        - $ref: '#/components/parameters/id'
+      description: Get offer by id
+      operationId: getOfferById
+      responses:
+        '200':
+          description: Retrieve the requested offer.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Offer'
+        '404':
+          description: Not Found
+  '/service':
+    get:
+      tags:
+        - SmartService
+      description: Get all available services
+      operationId: getServices
+      responses:
+        '200':
+          description: List of services.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SmartService'
+    post:
+      tags:
+        - SmartService
+      description: Create a new smart service
+      operationId: createService
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SmartService'
+      responses:
+        '201':
+          description: Successfully created service.
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              description: Id of the created service.
+  '/service/{id}':
+    get:
+      tags:
+        - SmartService
+      parameters:
+        - $ref: '#/components/parameters/id'
+      description: Get service by id
+      operationId: getServiceById
+      responses:
+        '200':
+          description: Retrieve the requested service.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmartService'
+        '404':
+          description: Not Found
+  '/order':
+    get:
+      tags:
+        - Order
+      description: Get all available orders
+      operationId: getOrder
+      responses:
+        '200':
+          description: List of order.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+    post:
+      tags:
+        - Order
+      description: Create a new order
+      operationId: createOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+      responses:
+        '201':
+          description: Successfully created order.
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              description: Id of the created order.
+  '/order/{id}':
+    get:
+      tags:
+        - Order
+      parameters:
+        - $ref: '#/components/parameters/id'
+      description: Get order by id
+      operationId: getOrderById
+      responses:
+        '200':
+          description: Retrieve the requested order.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '404':
+          description: Not Found
+
+
+components:
+  parameters:
+    id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    Organization:
+      type: object
+      description: 'Information about an organization.'
+      properties:
+        id:
+          type: string
+        legalName:
+          type: string
+        email:
+          type: string
+        telephone:
+          type: string
+        contactType:
+          type: string
+        addressCountry:
+          type: string
+        addressLocality:
+          type: string
+        addressRegion:
+          type: string
+        postOfficeBoxNumber:
+          type: string
+        postalCode:
+          type: string
+        streetAddress:
+          type: string
+    Provider:
+      type: object
+      description: 'A certain measurement provider'
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+    MeasurementPoint:
+      type: object
+      description: 'A certain point to be measured'
+      properties:
+        unitCode:
+          type: string
+        provider:
+          $ref: '#/components/schemas/Provider'
+        property:
+          type: string
+
+    PriceDefinition:
+      type: object
+      description: 'The definition of the price of a smartservice element.'
+      properties:
+        unitCode:
+          type: string
+        quantity:
+          type: number
+        price:
+          type: number
+        priceCurrency:
+          type: string
+        measurementPoint:
+          $ref: '#/components/schemas/MeasurementPoint'
+    SmartService:
+      type: object
+      description: 'A smart service.'
+      properties:
+        id:
+          type: string
+        category:
+          type: string
+        serviceType:
+          type: string
+        priceDefinitions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PriceDefinition'
+    Offer:
+      type: object
+      description: 'Information about an offer.'
+      properties:
+        id:
+          type: string
+        areaServed:
+          type: string
+        itemAvailable:
+          type: boolean
+        category:
+          type: string
+        sellerId:
+          type: string
+        serviceId:
+          type: string
+    Address:
+      type: object
+      description: 'A physical address'
+      properties:
+        addressCountry:
+          type: string
+        addressLocality:
+          type: string
+        addressRegion:
+          type: string
+        postOfficeBoxNumber:
+          type: string
+        postalCode:
+          type: string
+        streetAddress:
+          type: string
+    Order:
+      type: object
+      description: 'Information about an order'
+      properties:
+        id:
+          type: string
+        acceptedOfferId:
+          type: string
+        billingAddress:
+          $ref: '#/components/schemas/Address'
+        confirmationNumber:
+          type: string
+        sellerId:
+          type: string
+        customerId:
+          type: string
+        discount:
+          type: number
+        discountCurrency:
+          type: string
+        invoiceId:
+          type: string
+        paymentMethod:
+          type: string
+        orderNumber:
+          type: string
+
+

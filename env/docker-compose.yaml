@@ -1,0 +1,98 @@
+version: "3.5"
+services:
+  # Orion is the context broker
+  orion-ld:
+    image: ${ORION_IMAGE:-fiware/orion-ld:v0.8.1}
+    hostname: orion
+    # sometimes the initial startup fails due to a weird timescale behaviour
+    restart: always
+    environment:
+      - ORIONLD_TROE=TRUE
+      - ORIONLD_TROE_USER=orion
+      - ORIONLD_TROE_PWD=orion
+      - ORIONLD_TROE_HOST=timescale
+      - ORIONLD_MONGO_HOST=mongo-db
+    depends_on:
+      - mongo-db
+      - timescale
+    networks:
+      - default
+    ports:
+      - "1026:1026"
+    command: -logLevel DEBUG
+    healthcheck:
+      test: curl --fail -s http://orion:1026/version || exit 1
+      interval: 30s
+      retries: 15
+
+  # Databases
+  mongo-db:
+    image: mongo:4.0
+    hostname: mongo-db
+    expose:
+      - "27017"
+    ports:
+      - "27017:27017" # localhost:27017
+    networks:
+      - default
+    command: --nojournal
+    volumes:
+      - mongo-db:/data
+    healthcheck:
+      test: |
+        host=`hostname --ip-address || echo '127.0.0.1'`;
+        mongo --quiet $host/test --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 2)' && echo 0 || echo 1
+      interval: 30s
+
+  perseo-core:
+    image: fiware/perseo-core
+    environment:
+      - PERSEO_FE_URL=http://perseo-fe:9090
+      - MAX_AGE=6000
+    networks:
+      - default
+    depends_on:
+      - mongo-db
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  perseo-fe:
+    image: fiware/perseo
+    networks:
+      - default
+    ports:
+      - 9090:9090
+    environment:
+      - PERSEO_MONGO_ENDPOINT=mongo-db
+      - PERSEO_CORE_URL=http://perseo-core:8080
+      - PERSEO_LOG_LEVEL=debug
+      - PERSEO_ORION_URL=http://orion:1026/
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  timescale:
+    image: timescale/timescaledb-postgis:latest-pg12
+    hostname: timescale
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U orion" ]
+      interval: 15s
+      timeout: 15s
+      retries: 15
+      start_period: 60s
+    environment:
+      - POSTGRES_USER=orion
+      - POSTGRES_PASSWORD=orion
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    expose:
+      - "5432"
+    ports:
+      - "5432:5432"
+    networks:
+      - default
+
+volumes:
+  mongo-db: ~
