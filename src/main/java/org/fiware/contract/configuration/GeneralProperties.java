@@ -16,4 +16,8 @@ public class GeneralProperties {
 	 * ContextUrl for the service to use.
 	 */
 	private URL contextUrl;
+	/**
+	 * Tenant to be used by the contract server.
+	 */
+	private String tenant;
 }

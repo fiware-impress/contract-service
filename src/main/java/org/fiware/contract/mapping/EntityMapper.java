@@ -217,11 +217,18 @@ public interface EntityMapper {
 
 		smartService.setServiceType((String) ((Map) additionalProperties.get("serviceType")).get("value"));
 		smartService.setCategory((String) ((Map) additionalProperties.get("category")).get("value"));
-		List<Map> priceDefinitionList = ((List) ((Map) additionalProperties.get("priceDefinitions")).get("value"));
-		List<PriceDefinition> priceDefinitions = priceDefinitionList.stream()
-				.map(definitonMap -> OBJECT_MAPPER.convertValue(definitonMap, PriceDefinition.class))
-				.collect(Collectors.toList());
-		smartService.setPriceDefinitions(priceDefinitions);
+
+		Object priceDefinitionsValue = ((Map) additionalProperties.get("priceDefinitions")).get("value");
+		if (priceDefinitionsValue instanceof Map) {
+			PriceDefinition priceDefinition = OBJECT_MAPPER.convertValue((Map) priceDefinitionsValue, PriceDefinition.class);
+			smartService.setPriceDefinitions(List.of(priceDefinition));
+		} else {
+			List<Map> priceDefinitionList = ((List) priceDefinitionsValue);
+			List<PriceDefinition> priceDefinitions = priceDefinitionList.stream()
+					.map(definitonMap -> OBJECT_MAPPER.convertValue(definitonMap, PriceDefinition.class))
+					.collect(Collectors.toList());
+			smartService.setPriceDefinitions(priceDefinitions);
+		}
 
 		return smartService;
 	}

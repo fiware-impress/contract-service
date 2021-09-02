@@ -30,20 +30,20 @@ public class OrderRepository extends BrokerBaseRepository {
 	public Optional<Order> getOrderById(URI id) {
 
 		return entitiesApi
-				.retrieveEntityById(id, null, null, null, getLinkHeader())
+				.retrieveEntityById(generalProperties.getTenant(), id, null, null, null, getLinkHeader())
 				.getBody()
 				.map(entityVO -> entityMapper.entityVoToOrder(entityVO, organizationRepository, offerRepository));
 	}
 
 	public URI createOrder(Order order) {
 		EntityVO orderEntityVo = entityMapper.orderToEntityVo(order, generalProperties.getContextUrl());
-		HttpResponse<Object> response = entitiesApi.createEntity(orderEntityVo);
+		HttpResponse<Object> response = entitiesApi.createEntity(generalProperties.getTenant(), orderEntityVo);
 		return URI.create(IdHelper.getIdFromIdentifier(URI.create(response.getHeaders().get("Location"))));
 	}
 
 	public List<Order> getOrders() {
 		List<Order> orderList = new ArrayList<>();
-		Optional<EntityListVO> optionalEntityVOS = entitiesApi.queryEntities(null, null, "Order", null, null, null, null, null, null, null, null, null, getLinkHeader()).getBody();
+		Optional<EntityListVO> optionalEntityVOS = entitiesApi.queryEntities(generalProperties.getTenant(), null, null, "Order", null, null, null, null, null, null, null, null, null, getLinkHeader()).getBody();
 		for (EntityVO entityVO : optionalEntityVOS.get()) {
 			orderList.add(entityMapper.entityVoToOrder(entityVO, organizationRepository, offerRepository));
 		}

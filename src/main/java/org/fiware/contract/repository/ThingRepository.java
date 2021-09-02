@@ -12,13 +12,14 @@ import java.util.Optional;
 @Singleton
 public class ThingRepository extends BrokerBaseRepository {
 
+
 	public ThingRepository(GeneralProperties generalProperties, EntityMapper entityMapper, EntitiesApiClient entitiesApi) {
 		super(generalProperties, entityMapper, entitiesApi);
 	}
 
 	public Optional<GeneralThing> getThingById(URI thingId) {
 		return entitiesApi
-				.retrieveEntityById(thingId, null, null, null, getLinkHeader())
+				.retrieveEntityById(generalProperties.getTenant(), thingId, null, null, null, getLinkHeader())
 				.getBody()
 				.map(entityVO -> entityMapper.entityVoToGeneralThing(entityVO));
 	}

@@ -30,13 +30,13 @@ public class OfferRepository extends BrokerBaseRepository {
 
 	public URI createOffer(Offer offer) {
 		EntityVO offerEntity = entityMapper.offerToEntityVO(generalProperties.getContextUrl(), offer);
-		HttpResponse<Object> response = entitiesApi.createEntity(offerEntity);
+		HttpResponse<Object> response = entitiesApi.createEntity(generalProperties.getTenant(), offerEntity);
 		return URI.create(IdHelper.getIdFromIdentifier(URI.create(response.getHeaders().get("Location"))));
 	}
 
 	public List<Offer> getOffers() {
 		List<Offer> offerList = new ArrayList<>();
-		Optional<EntityListVO> optionalEntityVOS = entitiesApi.queryEntities(null, null, "Offer", null, null, null, null, null, null, null, null, null, getLinkHeader()).getBody();
+		Optional<EntityListVO> optionalEntityVOS = entitiesApi.queryEntities(generalProperties.getTenant(), null, null, "Offer", null, null, null, null, null, null, null, null, null, getLinkHeader()).getBody();
 		for (EntityVO entityVO : optionalEntityVOS.get()) {
 			offerList.add(entityMapper.entityVoToOffer(entityVO, organizationRepository, serviceRepository));
 		}
@@ -45,7 +45,7 @@ public class OfferRepository extends BrokerBaseRepository {
 
 	public Optional<Offer> getOffer(URI offerId) {
 		return entitiesApi
-				.retrieveEntityById(offerId, null, null, null, getLinkHeader())
+				.retrieveEntityById(generalProperties.getTenant(), offerId, null, null, null, getLinkHeader())
 				.getBody()
 				.map(entityVO -> entityMapper.entityVoToOffer(entityVO, organizationRepository, serviceRepository));
 	}
