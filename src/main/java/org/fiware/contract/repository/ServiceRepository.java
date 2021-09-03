@@ -18,8 +18,11 @@ import java.util.Optional;
 @Singleton
 public class ServiceRepository extends BrokerBaseRepository {
 
-	public ServiceRepository(GeneralProperties generalProperties, EntityMapper entityMapper, EntitiesApiClient entitiesApi) {
+	private final PriceDefinitionRepository priceDefinitionRepository;
+
+	public ServiceRepository(GeneralProperties generalProperties, EntityMapper entityMapper, EntitiesApiClient entitiesApi, PriceDefinitionRepository priceDefinitionRepository) {
 		super(generalProperties, entityMapper, entitiesApi);
+		this.priceDefinitionRepository = priceDefinitionRepository;
 	}
 
 	public URI createService(SmartService smartService) {
@@ -32,7 +35,7 @@ public class ServiceRepository extends BrokerBaseRepository {
 		List<SmartService> serviceList = new ArrayList<>();
 		Optional<EntityListVO> optionalEntityVOS = entitiesApi.queryEntities(generalProperties.getTenant(), null, null, "SmartService", null, null, null, null, null, null, null, null, null, getLinkHeader()).getBody();
 		for (EntityVO entityVO : optionalEntityVOS.get()) {
-			serviceList.add(entityMapper.entityVoToSmartService(entityVO));
+			serviceList.add(entityMapper.entityVoToSmartService(entityVO, priceDefinitionRepository));
 		}
 		return serviceList;
 	}
@@ -41,7 +44,7 @@ public class ServiceRepository extends BrokerBaseRepository {
 		return entitiesApi
 				.retrieveEntityById(generalProperties.getTenant(), serviceId, null, null, null, getLinkHeader())
 				.getBody()
-				.map(entityVO -> entityMapper.entityVoToSmartService(entityVO));
+				.map(entityVO -> entityMapper.entityVoToSmartService(entityVO, priceDefinitionRepository));
 	}
 
 }

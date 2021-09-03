@@ -16,6 +16,8 @@ tags:
     description: Api for smart services.
   - name: Order
     description: All order focused information
+  - name: PerseoCallback
+    description: Callback api for perseo rules
 paths:
   '/organization':
     get:
@@ -226,7 +228,21 @@ paths:
                 $ref: '#/components/schemas/Order'
         '404':
           description: Not Found
-
+  '/callback':
+    post:
+      tags:
+        - PerseoCallback
+      description: Handle the callback for the created rule
+      operationId: handleCallback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CallbackInformation'
+      responses:
+        '204':
+          description: Successfully handled callback.
 
 components:
   parameters:
@@ -279,7 +295,7 @@ components:
           type: string
         provider:
           $ref: '#/components/schemas/Provider'
-        property:
+        measurementQuery:
           type: string
 
     PriceDefinition:
@@ -362,11 +378,17 @@ components:
           type: number
         discountCurrency:
           type: string
-        invoiceId:
-          type: string
         paymentMethod:
           type: string
         orderNumber:
           type: string
-
-
+    CallbackInformation:
+      type: object
+      description: 'Information about the triggerd rule'
+      properties:
+        orderId:
+          type: string
+        priceDefinitionId:
+          type: string
+        currentValue:
+          type: object

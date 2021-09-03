@@ -2,6 +2,8 @@ package org.fiware.contract.rest;
 
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Controller;
+import io.micronaut.scheduling.TaskExecutors;
+import io.micronaut.scheduling.annotation.ExecuteOn;
 import lombok.RequiredArgsConstructor;
 import org.fiware.contract.IdHelper;
 import org.fiware.contract.api.OrganizationApi;
@@ -24,6 +26,7 @@ public class OrganizationApiController implements OrganizationApi {
 	private final OrganizationRepository organizationRepository;
 	private final EntityMapper entityMapper;
 
+	@ExecuteOn(TaskExecutors.IO)
 	@Override
 	public HttpResponse<Object> createOrganization(@Valid @NotNull OrganizationVO organizationVO) {
 		organizationVO.setId(UUID.randomUUID().toString());
@@ -32,6 +35,7 @@ public class OrganizationApiController implements OrganizationApi {
 		return HttpResponse.created(organizationRepository.createOrganization(organization));
 	}
 
+	@ExecuteOn(TaskExecutors.IO)
 	@Override
 	public Optional<OrganizationVO> getOrganizationById(String id) {
 
@@ -42,6 +46,7 @@ public class OrganizationApiController implements OrganizationApi {
 		}
 	}
 
+	@ExecuteOn(TaskExecutors.IO)
 	@Override
 	public List<OrganizationVO> getOrganizations() {
 		return organizationRepository.getOrganizations().stream().map(entityMapper::organizationToOrganizationVo).collect(Collectors.toList());

@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.fiware</groupId>
-    <artifactId>ContractService</artifactId>
+    <artifactId>contract-service</artifactId>
     <version>0.1</version>
 
     <parent>
@@ -51,8 +51,8 @@
         <exec.mainClass>org.fiware.contract.Application</exec.mainClass>
         <image.repository>wistefan</image.repository>
         <image.tag>latest</image.tag>
-        <rhel.username>rhel-user</rhel.username>
-        <rhel.password>rhel-password</rhel.password>
+        <!-- empty for local build -->
+        <image.registry></image.registry>
 
         <!-- lazy dev -->
         <version.org.projectlombok>1.18.16</version.org.projectlombok>
@@ -321,11 +321,38 @@
                             <modelNameSuffix>VO</modelNameSuffix>
                             <output>${project.build.directory}</output>
                             <configOptions>
+                                <clientId>dn</clientId>
                                 <fullJavaUtil>true</fullJavaUtil>
                                 <useGenericResponse>false</useGenericResponse>
                                 <useLombokGenerated>true</useLombokGenerated>
                                 <useBeanValidation>false</useBeanValidation>
                                 <jacksonDatabindNullable>false</jacksonDatabindNullable>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>openapi-perseo-client</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/api/perseo-client.yaml</inputSpec>
+                            <apiPackage>org.fiware.perseo.api</apiPackage>
+                            <strictSpec>true</strictSpec>
+                            <modelPackage>org.fiware.perseo.model</modelPackage>
+                            <generateAliasAsModel>true</generateAliasAsModel>
+                            <generatorName>micronaut</generatorName>
+                            <modelNameSuffix>VO</modelNameSuffix>
+                            <output>${project.build.directory}</output>
+                            <configOptions>
+                                <clientId>perseo</clientId>
+                                <fullJavaUtil>true</fullJavaUtil>
+                                <useGenericResponse>false</useGenericResponse>
+                                <useLombokGenerated>true</useLombokGenerated>
+                                <useBeanValidation>false</useBeanValidation>
+                                <jacksonDatabindNullable>false</jacksonDatabindNullable>
+                                <useReferencedSchemaAsDefault>true</useReferencedSchemaAsDefault>
                             </configOptions>
                         </configuration>
                     </execution>
@@ -469,55 +496,11 @@
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
                 <version>2.7.1</version>
-                <executions>
-                    <execution>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                        <id>build-distroless</id>
-                        <configuration>
-                            <to>
-                                <image>docker.io/${image.repository}/${artifactId}:${image.tag}-distroless</image>
-                                <image>docker.io/${image.repository}/${artifactId}:latest-distroless</image>
-                            </to>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>build-rhel</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                        <configuration>
-                            <to>
-                                <image>docker.io/${image.repository}/${artifactId}:${image.tag}-rhel</image>
-                                <image>docker.io/${image.repository}/${artifactId}:latest-rhel</image>
-                            </to>
-                            <from>
-                                <image>registry.redhat.io/openjdk/openjdk-11-rhel7</image>
-                                <auth>
-                                    <username>${rhel.username}</username>
-                                    <password>${rhel.password}</password>
-                                </auth>
-                            </from>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>build-default</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                        <configuration>
-                            <to>
-                                <image>docker.io/${image.repository}/${artifactId}:${image.tag}</image>
-                                <image>docker.io/${image.repository}/${artifactId}:latest</image>
-                            </to>
-                        </configuration>
-                    </execution>
-                </executions>
                 <configuration>
+                    <to>
+                        <image>${image.registry}${image.repository}/${artifactId}:${image.tag}</image>
+                        <image>${image.registry}${image.repository}/${artifactId}:latest</image>
+                    </to>
                     <container>
                         <labels>
                             <org.opencontainers.image.authors>${project.author.name} - ${project.author.email}</org.opencontainers.image.authors>

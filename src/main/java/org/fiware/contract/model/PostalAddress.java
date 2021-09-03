@@ -3,7 +3,7 @@ package org.fiware.contract.model;
 import lombok.Data;
 
 @Data
-public class PostalAddress extends Thing {
+public class PostalAddress {
 
 	private String addressCountry;
 	private String addressLocality;

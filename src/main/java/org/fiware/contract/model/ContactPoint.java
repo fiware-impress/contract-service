@@ -3,7 +3,7 @@ package org.fiware.contract.model;
 import lombok.Data;
 
 @Data
-public class ContactPoint extends Thing {
+public class ContactPoint {
 
 	private String email;
 	private String telephone;

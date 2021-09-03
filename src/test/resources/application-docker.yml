@@ -13,10 +13,7 @@ micronaut:
         descriptions: false
 
   http:
-    client:
-      read-timeout: 30s
     services:
-      read-timeout: 30s
       broker:
         path: ngsi-ld/v1
         url: http://localhost:1026
@@ -24,6 +21,10 @@ micronaut:
       perseo:
         path: /
         url: http://localhost:9090
+        read-timeout: 30
+      contract:
+        path: /
+        url: http://localhost:9080
         read-timeout: 30
 
 ---
@@ -43,5 +44,9 @@ loggers:
 ---
 general:
   contextUrl: https://smartdatamodels.org/context.jsonld
-  contractServiceCallbackUrl: http://localhost:8080/callback
+  contractServiceCallbackUrl: http://localhost:9080/callback
   tenant: impress
+
+---
+test:
+  clientId: contract

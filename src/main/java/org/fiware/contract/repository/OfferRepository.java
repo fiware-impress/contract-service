@@ -3,6 +3,7 @@ package org.fiware.contract.repository;
 import io.micronaut.http.HttpResponse;
 import lombok.RequiredArgsConstructor;
 import org.fiware.broker.api.EntitiesApiClient;
+import org.fiware.broker.model.EntityFragmentVO;
 import org.fiware.broker.model.EntityListVO;
 import org.fiware.broker.model.EntityVO;
 import org.fiware.contract.IdHelper;
@@ -32,6 +33,14 @@ public class OfferRepository extends BrokerBaseRepository {
 		EntityVO offerEntity = entityMapper.offerToEntityVO(generalProperties.getContextUrl(), offer);
 		HttpResponse<Object> response = entitiesApi.createEntity(generalProperties.getTenant(), offerEntity);
 		return URI.create(IdHelper.getIdFromIdentifier(URI.create(response.getHeaders().get("Location"))));
+	}
+
+	public void updateOffer(Offer offer) {
+		EntityFragmentVO offerEntityFragmentVO = entityMapper.entityToEntityFragmentVO(entityMapper.offerToEntityVO(generalProperties.getContextUrl(), offer));
+		// ID an type cannot be updated
+		offerEntityFragmentVO.setId(null);
+		offerEntityFragmentVO.setType(null);
+		entitiesApi.appendEntityAttrs(generalProperties.getTenant(), offer.getIdentifier(), offerEntityFragmentVO, null);
 	}
 
 	public List<Offer> getOffers() {

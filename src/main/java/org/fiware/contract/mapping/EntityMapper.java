@@ -2,6 +2,7 @@ package org.fiware.contract.mapping;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.fiware.broker.model.EntityFragmentVO;
 import org.fiware.broker.model.EntityVO;
 import org.fiware.broker.model.GeoPropertyVO;
 import org.fiware.broker.model.PropertyVO;
@@ -9,37 +10,38 @@ import org.fiware.broker.model.RelationshipVO;
 import org.fiware.contract.IdHelper;
 import org.fiware.contract.model.AddressVO;
 import org.fiware.contract.model.ContactPoint;
-import org.fiware.contract.model.GeneralThing;
+import org.fiware.contract.model.Invoice;
 import org.fiware.contract.model.ItemAvailability;
 import org.fiware.contract.model.MeasurementPoint;
 import org.fiware.contract.model.MeasurementPointVO;
+import org.fiware.contract.model.MonetaryAmount;
 import org.fiware.contract.model.Offer;
 import org.fiware.contract.model.OfferVO;
 import org.fiware.contract.model.Order;
 import org.fiware.contract.model.OrderVO;
 import org.fiware.contract.model.Organization;
 import org.fiware.contract.model.OrganizationVO;
+import org.fiware.contract.model.PaymentStatus;
 import org.fiware.contract.model.PostalAddress;
 import org.fiware.contract.model.PriceDefinition;
 import org.fiware.contract.model.PriceDefinitionVO;
-import org.fiware.contract.model.ProviderVO;
 import org.fiware.contract.model.SmartService;
 import org.fiware.contract.model.SmartServiceVO;
 import org.fiware.contract.model.Thing;
+import org.fiware.contract.repository.MeasurementPointRepository;
 import org.fiware.contract.repository.OfferRepository;
-import org.fiware.contract.repository.OrderRepository;
 import org.fiware.contract.repository.OrganizationRepository;
+import org.fiware.contract.repository.PriceDefinitionRepository;
 import org.fiware.contract.repository.ServiceRepository;
+import org.fiware.contract.repository.ThingRepository;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
 
 import java.net.URI;
 import java.net.URL;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.fiware.contract.model.PaymentMethod.BY_INVOICE;
@@ -48,6 +50,14 @@ import static org.fiware.contract.model.PaymentMethod.BY_INVOICE;
 public interface EntityMapper {
 
 	ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+	// Thing
+
+	default Thing entityVoToThing(EntityVO entityVO) {
+		Thing thing = new Thing();
+		thing.setIdentifier(entityVO.getId());
+		return thing;
+	}
 
 	// OFFERS
 
@@ -173,7 +183,7 @@ public interface EntityMapper {
 
 	// SMART SERVICES
 
-	default SmartService smartServiceVoToSmartService(SmartServiceVO smartServiceVO) {
+	default SmartService smartServiceVoToSmartService(SmartServiceVO smartServiceVO, ThingRepository thingRepository) {
 		SmartService service = new SmartService();
 		service.setIdentifier(IdHelper.getUriFromId("smart-service", smartServiceVO.getId()));
 
@@ -183,7 +193,7 @@ public interface EntityMapper {
 		service.setPriceDefinitions(smartServiceVO
 				.getPriceDefinitions()
 				.stream()
-				.map(this::priceDefinitionVoToPriceDefinition)
+				.map(pd -> priceDefinitionVoToPriceDefinition(pd, thingRepository))
 				.collect(Collectors.toList()));
 		return service;
 	}
@@ -209,7 +219,7 @@ public interface EntityMapper {
 		return entityVO;
 	}
 
-	default SmartService entityVoToSmartService(EntityVO entityVO) {
+	default SmartService entityVoToSmartService(EntityVO entityVO, PriceDefinitionRepository priceDefinitionRepository) {
 		Map<String, Object> additionalProperties = entityVO.getAdditionalProperties();
 
 		SmartService smartService = new SmartService();
@@ -218,41 +228,45 @@ public interface EntityMapper {
 		smartService.setServiceType((String) ((Map) additionalProperties.get("serviceType")).get("value"));
 		smartService.setCategory((String) ((Map) additionalProperties.get("category")).get("value"));
 
-		Object priceDefinitionsValue = ((Map) additionalProperties.get("priceDefinitions")).get("value");
-		if (priceDefinitionsValue instanceof Map) {
-			PriceDefinition priceDefinition = OBJECT_MAPPER.convertValue((Map) priceDefinitionsValue, PriceDefinition.class);
-			smartService.setPriceDefinitions(List.of(priceDefinition));
-		} else {
-			List<Map> priceDefinitionList = ((List) priceDefinitionsValue);
-			List<PriceDefinition> priceDefinitions = priceDefinitionList.stream()
-					.map(definitonMap -> OBJECT_MAPPER.convertValue(definitonMap, PriceDefinition.class))
+		if (additionalProperties.get("priceDefinitions") instanceof List) {
+			List<PriceDefinition> priceDefinitions = (List<PriceDefinition>) ((List) additionalProperties.get("priceDefinitions"))
+					.stream()
+					.map(property -> ((Map) property).get("object"))
+					.map(stringId -> URI.create((String) stringId))
+					.map(uriId -> priceDefinitionRepository.getPriceDefinitionById((URI) uriId))
 					.collect(Collectors.toList());
 			smartService.setPriceDefinitions(priceDefinitions);
+		} else {
+			String priceDefinitionsId = (String) ((Map) additionalProperties.get("priceDefinitions")).get("object");
+			smartService.setPriceDefinitions(List.of(priceDefinitionRepository.getPriceDefinitionById(URI.create(priceDefinitionsId))));
 		}
 
 		return smartService;
 	}
 
-	PriceDefinition priceDefinitionVoToPriceDefinition(PriceDefinitionVO priceDefinitionVO);
+	default PriceDefinition priceDefinitionVoToPriceDefinition(PriceDefinitionVO priceDefinitionVO, ThingRepository thingRepository) {
+		PriceDefinition priceDefinition = new PriceDefinition();
+		priceDefinition.setUnitCode(priceDefinitionVO.getUnitCode());
+		priceDefinition.setPriceCurrency(priceDefinitionVO.getPriceCurrency());
+		priceDefinition.setQuantity(priceDefinitionVO.getQuantity());
+		priceDefinition.setPrice(priceDefinitionVO.getPrice());
+		priceDefinition.setMeasurementPoint(measurementPointVoToMeasurementPoint(priceDefinitionVO.getMeasurementPoint(), thingRepository));
+		return priceDefinition;
+	}
 
 	PriceDefinitionVO priceDefinitionToPriceDefinitionVO(PriceDefinition priceDefinition);
 
-	MeasurementPoint measurementPointVoToMeasurementPoint(MeasurementPointVO measurementPointVO);
+	default MeasurementPoint measurementPointVoToMeasurementPoint(MeasurementPointVO measurementPointVO, ThingRepository thingRepository) {
+		MeasurementPoint measurementPoint = new MeasurementPoint();
+		measurementPoint.setMeasurementQuery(measurementPointVO.getMeasurementQuery());
+		measurementPoint.setUnitCode(measurementPointVO.getUnitCode());
+		measurementPoint.setProvider(thingRepository
+				.getThingById(URI.create(measurementPointVO.getProvider().getId())).orElseThrow(() -> new RuntimeException(String.format("Was not able to get thing."))));
+		return measurementPoint;
+	}
 
 	MeasurementPointVO measurementPointToMeasurementPointVo(MeasurementPoint measurementPoint);
 
-	default ProviderVO generalThingToProviderVo(GeneralThing generalThing) {
-		return new ProviderVO()
-				.id(IdHelper.getIdFromIdentifier(generalThing.getIdentifier()))
-				.type(generalThing.getThingType());
-	}
-
-	default GeneralThing providerVoToGeneralThing(ProviderVO providerVO) {
-		GeneralThing generalThing = new GeneralThing();
-		generalThing.setThingType(providerVO.type());
-		generalThing.setIdentifier(IdHelper.getUriFromId(providerVO.type(), providerVO.id()));
-		return generalThing;
-	}
 
 	default Number doubleToNumber(Double doubleValue) {
 		return doubleValue;
@@ -260,15 +274,6 @@ public interface EntityMapper {
 
 	default Double numberToDouble(Number number) {
 		return number.doubleValue();
-	}
-
-	// THING
-
-	default GeneralThing entityVoToGeneralThing(EntityVO entityVO) {
-		GeneralThing generalThing = new GeneralThing();
-		generalThing.setIdentifier(entityVO.getId());
-		generalThing.setThingType(entityVO.getType());
-		return generalThing;
 	}
 
 	// ORDER
@@ -283,8 +288,7 @@ public interface EntityMapper {
 		order.setDiscount(orderVO.getDiscount());
 		order.setDiscountCurrency(orderVO.getDiscountCurrency());
 		order.setOrderNumber(orderVO.getOrderNumber());
-		// still to do
-		order.setPartOfInvoice(null);
+
 		order.setPaymentMethod(BY_INVOICE);
 		order.setBillingAddress(addressVoToPostalAddress(orderVO.getBillingAddress()));
 		return order;
@@ -303,7 +307,6 @@ public interface EntityMapper {
 		orderVO.setSellerId(IdHelper.getIdFromIdentifier(order.getSeller().getIdentifier()));
 		orderVO.setDiscount(order.getDiscount().doubleValue());
 		orderVO.setDiscountCurrency(order.getDiscountCurrency());
-		orderVO.setInvoiceId("temp");
 		orderVO.setPaymentMethod(BY_INVOICE.value());
 		orderVO.setBillingAddress(postalAddressToAddressVo(order.getBillingAddress()));
 		orderVO.setAcceptedOfferId(IdHelper.getIdFromIdentifier(order.getAcceptedOffer().getIdentifier()));
@@ -353,6 +356,122 @@ public interface EntityMapper {
 		return order;
 	}
 
+	// Invoices
+
+	default EntityVO invoiceToEntityVO(URL context, Invoice invoice) {
+		EntityVO entityVO = getEntityVO("Invoice", context, invoice.getIdentifier());
+		entityVO.setAdditionalProperties(invoiceToProperties(invoice));
+		return entityVO;
+	}
+
+	private Map<String, Object> invoiceToProperties(Invoice invoice) {
+		Map<String, Object> objectMap = new HashMap<>();
+		objectMap.put("accountId", asProperty(invoice.getAccountId()));
+		objectMap.put("confirmationNumber", asProperty(invoice.getConfirmationNumber()));
+		objectMap.put("paymentDueDate", asProperty(invoice.getPaymentDueDate()));
+		objectMap.put("paymentMethod", asProperty(invoice.getPaymentMethod()));
+		objectMap.put("paymentStatus", asProperty(invoice.getPaymentStatus().value()));
+		objectMap.put("customer", asRelationShip(invoice.getCustomer().getIdentifier()));
+		objectMap.put("producer", asRelationShip(invoice.getProducer().getIdentifier()));
+		List<RelationshipVO> referencesOrderList = invoice.getReferencesOrder()
+				.stream()
+				.map(refOrder -> asRelationShip(refOrder.getIdentifier()))
+				.collect(Collectors.toList());
+		objectMap.put("referencesOrder", referencesOrderList);
+		objectMap.put("totalPaymentDue", asProperty(invoice.getTotalPaymentDue()));
+		return objectMap;
+	}
+
+	default Invoice entityVoToInvoice(EntityVO entityVO, OrganizationRepository organizationRepository) {
+		Map<String, Object> additionalProperties = entityVO.getAdditionalProperties();
+
+		Invoice invoice = new Invoice();
+		invoice.setIdentifier(entityVO.getId());
+		invoice.setAccountId((String) ((Map) additionalProperties.get("accountId")).get("value"));
+		invoice.setConfirmationNumber((String) ((Map) additionalProperties.get("confirmationNumber")).get("value"));
+		invoice.setPaymentDueDate(Instant.ofEpochSecond((Long) ((Map) additionalProperties.get("paymentDueDate")).get("value")));
+		invoice.setPaymentMethod(BY_INVOICE);
+		invoice.setPaymentStatus(PaymentStatus.valueOf((String) ((Map) additionalProperties.get("paymentStatus")).get("value")));
+		String producerId = (String) ((Map) additionalProperties.get("producer")).get("object");
+		String customerId = (String) ((Map) additionalProperties.get("customer")).get("object");
+		invoice.setProducer(organizationRepository.getOrganizationById(URI.create(producerId)));
+		invoice.setCustomer(organizationRepository.getOrganizationById(URI.create(customerId)));
+
+		// TODO references Order
+
+		invoice.setTotalPaymentDue(OBJECT_MAPPER.convertValue(((Map) additionalProperties.get("totalPaymentDue")).get("value"), MonetaryAmount.class));
+		return invoice;
+	}
+
+	// MEASUREMENT POINT
+
+	default EntityVO measurementPointToEntityVO(MeasurementPoint measurementPoint, URL contextURL) {
+		EntityVO entityVO = getEntityVO("MeasurementPoint", contextURL, measurementPoint.getIdentifier());
+		entityVO.setAdditionalProperties(Map.of(
+				"unitCode", asProperty(measurementPoint.getUnitCode()),
+				"measurementQuery", asProperty(measurementPoint.getMeasurementQuery()),
+				"provider", asRelationShip(measurementPoint.getProvider().getIdentifier())
+		));
+		return entityVO;
+	}
+
+	default MeasurementPoint entityVoToMeasurementPoint(EntityVO entityVO, ThingRepository thingRepository) {
+		Map<String, Object> additionalProperties = entityVO.getAdditionalProperties();
+
+		MeasurementPoint measurementPoint = new MeasurementPoint();
+
+		measurementPoint.setIdentifier(entityVO.getId());
+		measurementPoint.setUnitCode((String) ((Map) additionalProperties.get("unitCode")).get("value"));
+		measurementPoint.setMeasurementQuery((String) ((Map) additionalProperties.get("measurementQuery")).get("value"));
+
+		String providerId = (String) ((Map) additionalProperties.get("provider")).get("object");
+		measurementPoint.setProvider(thingRepository.getThingById(URI.create(providerId)).orElseThrow(() -> new RuntimeException(String.format("Provider %s not found.", providerId))));
+
+		return measurementPoint;
+	}
+
+	// Price Definition
+
+	default EntityVO priceDefinitionToEntityVo(PriceDefinition priceDefinition, URL contextURL) {
+		EntityVO entityVO = getEntityVO("PriceDefinition", contextURL, priceDefinition.getIdentifier());
+		entityVO.setAdditionalProperties(Map.of(
+				"unitCode", asProperty(priceDefinition.getUnitCode()),
+				"quantity", asProperty(priceDefinition.getQuantity()),
+				"price", asProperty(priceDefinition.getPrice()),
+				"priceCurrency", asProperty(priceDefinition.getPriceCurrency()),
+				"measurementPoint", asRelationShip(priceDefinition.getMeasurementPoint().getIdentifier())
+		));
+		return entityVO;
+	}
+
+	default PriceDefinition entityVoToPriceDefinition(EntityVO entityVO, MeasurementPointRepository measurementPointRepository) {
+		Map<String, Object> additionalProperties = entityVO.getAdditionalProperties();
+
+		PriceDefinition priceDefinition = new PriceDefinition();
+		priceDefinition.setIdentifier(entityVO.getId());
+		priceDefinition.setPrice((Number) ((Map) additionalProperties.get("price")).get("value"));
+		priceDefinition.setPriceCurrency((String) ((Map) additionalProperties.get("priceCurrency")).get("value"));
+		priceDefinition.setQuantity((Number) ((Map) additionalProperties.get("quantity")).get("value"));
+		priceDefinition.setUnitCode((String) ((Map) additionalProperties.get("unitCode")).get("value"));
+
+		String measurementPointId = (String) ((Map) additionalProperties.get("measurementPoint")).get("object");
+		priceDefinition.setMeasurementPoint(measurementPointRepository.getMeasurementPointById(URI.create(measurementPointId)));
+
+		return priceDefinition;
+	}
+
+	default EntityFragmentVO entityToEntityFragmentVO(EntityVO entityVO) {
+		EntityFragmentVO entityFragmentVO = new EntityFragmentVO();
+		entityFragmentVO.setAdditionalProperties(entityVO.getAdditionalProperties());
+		entityFragmentVO.setAtContext(entityVO.getAtContext());
+		entityFragmentVO.setCreatedAt(entityVO.getCreatedAt());
+		entityFragmentVO.setModifiedAt(entityVO.getModifiedAt());
+		entityFragmentVO.setLocation(entityVO.getLocation());
+		entityFragmentVO.setObservationSpace(entityVO.getObservationSpace());
+		entityFragmentVO.setOperationSpace(entityVO.getOperationSpace());
+		return entityFragmentVO;
+	}
+
 	// HELPER
 
 	private EntityVO getEntityVO(String type, URL context, URI id) {
@@ -391,7 +510,10 @@ public interface EntityMapper {
 		objectMap.put("category", asProperty(smartService.getCategory()));
 		objectMap.put("serviceType", asProperty(smartService.getServiceType()));
 
-		objectMap.put("priceDefinitions", asProperty(smartService.getPriceDefinitions()));
+		objectMap.put("priceDefinitions", smartService
+				.getPriceDefinitions()
+				.stream()
+				.map(priceDefinition -> asRelationShip(priceDefinition.getIdentifier())).collect(Collectors.toList()));
 		return objectMap;
 	}
 

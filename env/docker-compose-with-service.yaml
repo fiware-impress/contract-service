@@ -56,10 +56,6 @@ services:
       - default
     depends_on:
       - mongo-db
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
 
   perseo-fe:
     image: perseo-fe:2
@@ -77,10 +73,6 @@ services:
     depends_on:
       - mongo-db
       - perseo-core
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
 
   timescale:
     image: timescale/timescaledb-postgis:latest-pg12
@@ -99,6 +91,22 @@ services:
       - "5432"
     ports:
       - "5432:5432"
+    networks:
+      - default
+
+  contract-service:
+    image: wistefan/contract-service
+    hostname: contract-service
+    depends_on:
+      - orion-ld
+    expose:
+      - "8080"
+    ports:
+    - "9080:8080"
+    environment:
+      - MICRONAUT_HTTP_SERVICES_BROKER_URL=http://orion-ld:1026
+      - MICRONAUT_HTTP_SERVICES_PERSEO_URL=http://perseo-fe:9090
+      - GENERAL_CONTRACT_SERVICE_CALLBACK_URL=http://contract-service:8080/callback
     networks:
       - default
 

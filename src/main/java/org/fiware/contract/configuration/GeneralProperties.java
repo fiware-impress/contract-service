@@ -16,6 +16,12 @@ public class GeneralProperties {
 	 * ContextUrl for the service to use.
 	 */
 	private URL contextUrl;
+
+	/**
+	 * URL for the callback from perseo
+	 */
+	private URL contractServiceCallbackUrl;
+
 	/**
 	 * Tenant to be used by the contract server.
 	 */

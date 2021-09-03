@@ -2,6 +2,8 @@ package org.fiware.contract.rest;
 
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.annotation.Controller;
+import io.micronaut.scheduling.TaskExecutors;
+import io.micronaut.scheduling.annotation.ExecuteOn;
 import lombok.RequiredArgsConstructor;
 import org.fiware.contract.IdHelper;
 import org.fiware.contract.api.OfferApi;
@@ -30,7 +32,7 @@ public class OfferApiController implements OfferApi {
 
 	private final EntityMapper entityMapper;
 
-
+	@ExecuteOn(TaskExecutors.IO)
 	@Override
 	public HttpResponse<Object> createOffer(@Valid @NotNull OfferVO offerVO) {
 		offerVO.setId(UUID.randomUUID().toString());
@@ -41,11 +43,13 @@ public class OfferApiController implements OfferApi {
 		return HttpResponse.created(offerRepository.createOffer(offer));
 	}
 
+	@ExecuteOn(TaskExecutors.IO)
 	@Override
 	public Optional<OfferVO> getOfferById(String offerId) {
 		return offerRepository.getOffer(IdHelper.getUriFromId("offer", offerId)).map(entityMapper::offerToOfferVO);
 	}
 
+	@ExecuteOn(TaskExecutors.IO)
 	@Override
 	public List<OfferVO> getOffers() {
 		return offerRepository.getOffers().stream().filter(Objects::nonNull).map(entityMapper::offerToOfferVO).collect(Collectors.toList());

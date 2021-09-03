@@ -1,0 +1,74 @@
+openapi: 3.0.3
+info:
+  description: 'The spec describes the perseo rule management api'
+  version: latest
+  title: Perseo API
+  contact:
+    email: stefan.wiedemann@fiware.org
+tags:
+  - name: Rules
+    description: Apis for managing perseo rules
+
+paths:
+  '/rules':
+    parameters:
+      - $ref: '#/components/parameters/tenantHeader'
+    post:
+      tags:
+        - Rules
+      description: Post a new rule.
+      operationId: createRule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Rule'
+      responses:
+        '200':
+          description: Successfully created the rule
+
+components:
+  parameters:
+    tenantHeader:
+      name: Fiware-Service
+      in: header
+      schema:
+        type: string
+        default: "orion"
+      required: true
+  schemas:
+    Headers:
+      type: object
+      description: Headers to be set at the request
+      additionalProperties:
+        type: string
+    ActionParameters:
+      type: object
+      description: Parameters of a post action.
+      properties:
+        url:
+          type: string
+        headers:
+          $ref: '#/components/schemas/Headers'
+    PostAction:
+      type: object
+      description: Http-Post action to be used in a perseo rule.
+      properties:
+        type:
+          type: string
+          enum: ["post"]
+        template:
+          type: string
+        parameters:
+          $ref: '#/components/schemas/ActionParameters'
+    Rule:
+      type: object
+      description: The perseo rule
+      properties:
+        name:
+          type: string
+        text:
+          type: string
+        action:
+          $ref: '#/components/schemas/PostAction'
