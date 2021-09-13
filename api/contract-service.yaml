@@ -18,6 +18,8 @@ tags:
     description: All order focused information
   - name: PerseoCallback
     description: Callback api for perseo rules
+  - name: InvoiceFiles
+    description: Api to work with invoice files
 paths:
   '/organization':
     get:
@@ -243,6 +245,38 @@ paths:
       responses:
         '204':
           description: Successfully handled callback.
+  '/invoice/pdf/{id}':
+    post:
+      tags:
+        - InvoiceFiles
+      parameters:
+        - $ref: '#/components/parameters/id'
+      description: Handle uploads of invoice pdfs
+      requestBody:
+        content:
+          application/pdf:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '204':
+          description: Successfully stored the file.
+    get:
+      tags:
+        - InvoiceFiles
+      parameters:
+        - $ref: '#/components/parameters/id'
+      description: Provide the pdf invoices
+      responses:
+        '200':
+          description: The pdf file
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: No such invoice exists.
 
 components:
   parameters:
