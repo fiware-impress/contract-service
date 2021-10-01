@@ -47,6 +47,9 @@ public class MeasurementPointRepository extends BrokerBaseRepository {
 	public List<MeasurementPoint> getMeasurementPoints() {
 		List<MeasurementPoint> measurementPointList = new ArrayList<>();
 		Optional<EntityListVO> optionalEntityVOS = entitiesApi.queryEntities(generalProperties.getTenant(), null, null, "MeasurementPoint", null, null, null, null, null, null, null, null, null, getLinkHeader()).getBody();
+		if (optionalEntityVOS.isEmpty()) {
+			return List.of();
+		}
 		for (EntityVO entityVO : optionalEntityVOS.get()) {
 			measurementPointList.add(entityMapper.entityVoToMeasurementPoint(entityVO, thingRepository));
 		}

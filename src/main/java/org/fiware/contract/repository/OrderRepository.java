@@ -44,6 +44,9 @@ public class OrderRepository extends BrokerBaseRepository {
 	public List<Order> getOrders() {
 		List<Order> orderList = new ArrayList<>();
 		Optional<EntityListVO> optionalEntityVOS = entitiesApi.queryEntities(generalProperties.getTenant(), null, null, "Order", null, null, null, null, null, null, null, null, null, getLinkHeader()).getBody();
+		if (optionalEntityVOS.isEmpty()) {
+			return List.of();
+		}
 		for (EntityVO entityVO : optionalEntityVOS.get()) {
 			orderList.add(entityMapper.entityVoToOrder(entityVO, organizationRepository, offerRepository));
 		}

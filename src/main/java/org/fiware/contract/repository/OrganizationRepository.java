@@ -40,6 +40,9 @@ public class OrganizationRepository extends BrokerBaseRepository {
 	public List<Organization> getOrganizations() {
 		List<Organization> organizationList = new ArrayList<>();
 		Optional<EntityListVO> optionalEntityVOS = entitiesApi.queryEntities(generalProperties.getTenant(), null, null, "Organization", null, null, null, null, null, null, null, null, null, getLinkHeader()).getBody();
+		if (optionalEntityVOS.isEmpty()) {
+			return List.of();
+		}
 		for (EntityVO entityVO : optionalEntityVOS.get()) {
 			organizationList.add(entityMapper.entityVoToOrganization(entityVO));
 		}

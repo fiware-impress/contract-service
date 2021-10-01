@@ -46,6 +46,9 @@ public class OfferRepository extends BrokerBaseRepository {
 	public List<Offer> getOffers() {
 		List<Offer> offerList = new ArrayList<>();
 		Optional<EntityListVO> optionalEntityVOS = entitiesApi.queryEntities(generalProperties.getTenant(), null, null, "Offer", null, null, null, null, null, null, null, null, null, getLinkHeader()).getBody();
+		if (optionalEntityVOS.isEmpty()) {
+			return List.of();
+		}
 		for (EntityVO entityVO : optionalEntityVOS.get()) {
 			offerList.add(entityMapper.entityVoToOffer(entityVO, organizationRepository, serviceRepository));
 		}

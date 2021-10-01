@@ -34,6 +34,9 @@ public class ServiceRepository extends BrokerBaseRepository {
 	public List<SmartService> getServices() {
 		List<SmartService> serviceList = new ArrayList<>();
 		Optional<EntityListVO> optionalEntityVOS = entitiesApi.queryEntities(generalProperties.getTenant(), null, null, "SmartService", null, null, null, null, null, null, null, null, null, getLinkHeader()).getBody();
+		if (optionalEntityVOS.isEmpty()) {
+			return List.of();
+		}
 		for (EntityVO entityVO : optionalEntityVOS.get()) {
 			serviceList.add(entityMapper.entityVoToSmartService(entityVO, priceDefinitionRepository));
 		}

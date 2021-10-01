@@ -45,6 +45,9 @@ public class PriceDefinitionRepository extends BrokerBaseRepository {
 	public List<PriceDefinition> getPriceDefinitions() {
 		List<PriceDefinition> priceDefinitionList = new ArrayList<>();
 		Optional<EntityListVO> optionalEntityVOS = entitiesApi.queryEntities(generalProperties.getTenant(), null, null, "PriceDefinition", null, null, null, null, null, null, null, null, null, getLinkHeader()).getBody();
+		if (optionalEntityVOS.isEmpty()) {
+			return List.of();
+		}
 		for (EntityVO entityVO : optionalEntityVOS.get()) {
 			priceDefinitionList.add(entityMapper.entityVoToPriceDefinition(entityVO, measurementPointRepository));
 		}
