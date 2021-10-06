@@ -24,7 +24,7 @@ micronaut:
         read-timeout: 30
       contract:
         path: /
-        url: http://localhost:9080
+        url: http://localhost:8080
         read-timeout: 30
 
 ---

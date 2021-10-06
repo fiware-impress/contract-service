@@ -18,8 +18,8 @@ tags:
     description: All order focused information
   - name: PerseoCallback
     description: Callback api for perseo rules
-  - name: InvoiceFiles
-    description: Api to work with invoice files
+  - name: Invoice
+    description: Api to work with invoice
 paths:
   '/organization':
     get:
@@ -245,10 +245,26 @@ paths:
       responses:
         '204':
           description: Successfully handled callback.
-  '/invoice/pdf/{id}':
+  '/invoice/{id}':
+    get:
+      tags:
+        - Invoice
+      parameters:
+        - $ref: '#/components/parameters/id'
+      description: Provide the pdf invoices
+      responses:
+        '200':
+          description: The invoice.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invoice'
+        '404':
+          description: No such invoice exists.
+  '/invoice/{id}/pdf':
     post:
       tags:
-        - InvoiceFiles
+        - Invoice
       parameters:
         - $ref: '#/components/parameters/id'
       description: Handle uploads of invoice pdfs
@@ -263,7 +279,7 @@ paths:
           description: Successfully stored the file.
     get:
       tags:
-        - InvoiceFiles
+        - Invoice
       parameters:
         - $ref: '#/components/parameters/id'
       description: Provide the pdf invoices
@@ -426,3 +442,34 @@ components:
           type: string
         currentValue:
           type: object
+    Invoice:
+      type: object
+      description: 'Information about a specific invoice'
+      properties:
+        id:
+          type: string
+        accountId:
+          type: string
+        confirmationNumber:
+          type: string
+        paymentDueDate:
+          type: string
+          format: date-time
+        paymentMethod:
+          type: string
+        paymentMethodId:
+          type: string
+        paymentStatus:
+          type: string
+        producer:
+          $ref: '#/components/schemas/Organization'
+        customer:
+          $ref: '#/components/schemas/Organization'
+        referencesOrders:
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
+        currency:
+          type: string
+        amount:
+          type: number

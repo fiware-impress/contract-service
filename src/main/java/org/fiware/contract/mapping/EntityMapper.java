@@ -11,6 +11,7 @@ import org.fiware.contract.IdHelper;
 import org.fiware.contract.model.AddressVO;
 import org.fiware.contract.model.ContactPoint;
 import org.fiware.contract.model.Invoice;
+import org.fiware.contract.model.InvoiceVO;
 import org.fiware.contract.model.ItemAvailability;
 import org.fiware.contract.model.MeasurementPoint;
 import org.fiware.contract.model.MeasurementPointVO;
@@ -30,6 +31,7 @@ import org.fiware.contract.model.SmartServiceVO;
 import org.fiware.contract.model.Thing;
 import org.fiware.contract.repository.MeasurementPointRepository;
 import org.fiware.contract.repository.OfferRepository;
+import org.fiware.contract.repository.OrderRepository;
 import org.fiware.contract.repository.OrganizationRepository;
 import org.fiware.contract.repository.PriceDefinitionRepository;
 import org.fiware.contract.repository.ServiceRepository;
@@ -42,6 +44,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.fiware.contract.model.PaymentMethod.BY_INVOICE;
@@ -382,7 +385,7 @@ public interface EntityMapper {
 		return objectMap;
 	}
 
-	default Invoice entityVoToInvoice(EntityVO entityVO, OrganizationRepository organizationRepository) {
+	default Invoice entityVoToInvoice(EntityVO entityVO, OrganizationRepository organizationRepository, OrderRepository orderRepository) {
 		Map<String, Object> additionalProperties = entityVO.getAdditionalProperties();
 
 		Invoice invoice = new Invoice();
@@ -397,11 +400,27 @@ public interface EntityMapper {
 		invoice.setProducer(organizationRepository.getOrganizationById(URI.create(producerId)));
 		invoice.setCustomer(organizationRepository.getOrganizationById(URI.create(customerId)));
 
-		// TODO references Order
+		if (entityVO.getAdditionalProperties().get("referencesOrder") instanceof List) {
+			List<Order> orders = (List<Order>) ((List) additionalProperties.get("referencesOrder"))
+					.stream()
+					.map(property -> ((Map) property).get("object"))
+					.map(stringId -> URI.create((String) stringId))
+					.map(uriId -> orderRepository.getOrderById((URI) uriId))
+					.filter(optionalOrder -> ((Optional<Order>) optionalOrder).isPresent())
+					.map(presentOrder -> ((Optional<Order>) presentOrder).get())
+					.collect(Collectors.toList());
+			invoice.setReferencesOrder(orders);
+		} else {
+			String orderId = (String) ((Map) additionalProperties.get("referencesOrder")).get("object");
+			invoice.setReferencesOrder(orderRepository.getOrderById(URI.create(orderId)).map(o -> List.of(o)).orElse(List.of()));
+		}
 
 		invoice.setTotalPaymentDue(OBJECT_MAPPER.convertValue(((Map) additionalProperties.get("totalPaymentDue")).get("value"), MonetaryAmount.class));
 		return invoice;
 	}
+
+	InvoiceVO invoiceToInvoiceVO(Invoice invoice);
+
 
 	// MEASUREMENT POINT
 

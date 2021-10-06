@@ -21,10 +21,12 @@ import java.util.Optional;
 public class InvoiceRepository extends BrokerBaseRepository {
 
 	private final OrganizationRepository organizationRepository;
+	private final OrderRepository orderRepository;
 
-	public InvoiceRepository(GeneralProperties generalProperties, EntityMapper entityMapper, EntitiesApiClient entitiesApi, OrganizationRepository organizationRepository) {
+	public InvoiceRepository(GeneralProperties generalProperties, EntityMapper entityMapper, EntitiesApiClient entitiesApi, OrganizationRepository organizationRepository, OrderRepository orderRepository) {
 		super(generalProperties, entityMapper, entitiesApi);
 		this.organizationRepository = organizationRepository;
+		this.orderRepository = orderRepository;
 	}
 
 	public URI createInvoice(Invoice invoice) {
@@ -40,7 +42,7 @@ public class InvoiceRepository extends BrokerBaseRepository {
 			return List.of();
 		}
 		for (EntityVO entityVO : optionalEntityVOS.get()) {
-			invoiceList.add(entityMapper.entityVoToInvoice(entityVO, organizationRepository));
+			invoiceList.add(entityMapper.entityVoToInvoice(entityVO, organizationRepository, orderRepository));
 		}
 		return invoiceList;
 	}
@@ -49,6 +51,6 @@ public class InvoiceRepository extends BrokerBaseRepository {
 		return entitiesApi
 				.retrieveEntityById(generalProperties.getTenant(), invoiceId, null, null, null, getLinkHeader())
 				.getBody()
-				.map(entityVO -> entityMapper.entityVoToInvoice(entityVO, organizationRepository));
+				.map(entityVO -> entityMapper.entityVoToInvoice(entityVO, organizationRepository, orderRepository));
 	}
 }
