@@ -452,6 +452,9 @@ components:
           type: string
         confirmationNumber:
           type: string
+        creationDate:
+          type: string
+          format: date-time
         paymentDueDate:
           type: string
           format: date-time
