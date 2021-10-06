@@ -394,6 +394,7 @@ public interface EntityMapper {
 		invoice.setConfirmationNumber((String) ((Map) additionalProperties.get("confirmationNumber")).get("value"));
 		invoice.setPaymentDueDate(Instant.ofEpochSecond((Long) ((Map) additionalProperties.get("paymentDueDate")).get("value")));
 		invoice.setPaymentMethod(BY_INVOICE);
+		invoice.setCreationDate(entityVO.createdAt());
 		invoice.setPaymentStatus(PaymentStatus.valueOf((String) ((Map) additionalProperties.get("paymentStatus")).get("value")));
 		String producerId = (String) ((Map) additionalProperties.get("producer")).get("object");
 		String customerId = (String) ((Map) additionalProperties.get("customer")).get("object");

@@ -12,6 +12,7 @@ public class Invoice extends Thing {
 	private String confirmationNumber;
 
 	private Instant paymentDueDate;
+	private Instant creationDate;
 	private PaymentMethod paymentMethod;
 	private String paymentMethodId;
 
