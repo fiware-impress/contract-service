@@ -62,7 +62,7 @@ services:
         condition: on-failure
 
   perseo-fe:
-    image: perseo-fe:2
+    image: fiware/perseo
     networks:
       - default
     expose:
