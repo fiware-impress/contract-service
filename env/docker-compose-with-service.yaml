@@ -95,7 +95,7 @@ services:
       - default
 
   contract-service:
-    image: wistefan/contract-service
+    image: quay.io/wi_stefan/contract-service
     hostname: contract-service
     depends_on:
       - orion-ld
