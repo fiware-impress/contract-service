@@ -245,6 +245,23 @@ paths:
       responses:
         '204':
           description: Successfully handled callback.
+  '/invoice':
+    get:
+      tags:
+        - Invoice
+      description: Provide the pdf invoices
+      operationId: getInvoices
+      responses:
+        '200':
+          description: The existing invoices.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Invoice'
+        '404':
+          description: No such invoice exists.
   '/invoice/{id}':
     get:
       tags:
@@ -252,6 +269,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/id'
       description: Provide the pdf invoices
+      operationId: getInvoiceById
       responses:
         '200':
           description: The invoice.
@@ -268,6 +286,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/id'
       description: Handle uploads of invoice pdfs
+      operationId: uploadInvoicePdf
       requestBody:
         content:
           application/pdf:
@@ -283,6 +302,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/id'
       description: Provide the pdf invoices
+      operationId: retrieveInvoicePdf
       responses:
         '200':
           description: The pdf file
