@@ -47,7 +47,7 @@ jobs:
       - name: Build image
         run: |
           mvn versions:set -DnewVersion=${{ steps.out.outputs.version }}
-          mvn clean install -DskipTests -Dimage.tag=${{ steps.out.outputs.version }} -Dimage.registry="quay.io" -Pdocker
+          mvn clean install -DskipTests -Dimage.tag=${{ steps.out.outputs.version }} -Dimage.registry="quay.io/" -Pdocker
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
