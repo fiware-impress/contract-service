@@ -49,7 +49,7 @@
 
         <!-- docker -->
         <exec.mainClass>org.fiware.contract.Application</exec.mainClass>
-        <image.repository>wistefan</image.repository>
+        <image.repository>wi_stefan</image.repository>
         <image.tag>latest</image.tag>
         <!-- empty for local build -->
         <image.registry></image.registry>
