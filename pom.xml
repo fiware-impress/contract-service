@@ -49,7 +49,7 @@
 
         <!-- docker -->
         <exec.mainClass>org.fiware.contract.Application</exec.mainClass>
-        <image.repository>wistefan</image.repository>
+        <image.repository>wi_stefan</image.repository>
         <image.tag>latest</image.tag>
         <!-- empty for local build -->
         <image.registry></image.registry>
@@ -64,7 +64,7 @@
         <!-- code gen -->
         <version.org.openapitools.generator-maven-plugin>5.0.0
         </version.org.openapitools.generator-maven-plugin>
-        <version.io.kokuwa.micronaut.codegen>2.1.7-SNAPSHOT</version.io.kokuwa.micronaut.codegen>
+        <version.io.kokuwa.micronaut.codegen>2.1.9</version.io.kokuwa.micronaut.codegen>
 
         <!-- test -->
         <version.org.testcontainers>1.15.1</version.org.testcontainers>
@@ -492,6 +492,25 @@
                     </archive>
                 </configuration>
             </plugin>
+            <!-- copy project dependencies -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>micronaut-lib</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeScope>runtime</includeScope>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                            <silent>true</silent>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
@@ -517,23 +536,13 @@
                         </labels>
                     </container>
                 </configuration>
-            </plugin>
-            <!-- copy project dependencies -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>micronaut-lib</id>
-                        <phase>prepare-package</phase>
+                        <id>install-default-latest</id>
+                        <phase>deploy</phase>
                         <goals>
-                            <goal>copy-dependencies</goal>
+                            <goal>build</goal>
                         </goals>
-                        <configuration>
-                            <includeScope>runtime</includeScope>
-                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
-                            <silent>true</silent>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
