@@ -9,7 +9,9 @@ import org.fiware.contract.repository.InvoiceRepository;
 import org.fiware.contract.repository.PdfInvoiceRepository;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Controller
@@ -20,17 +22,24 @@ public class InvoiceApiController implements InvoiceApi {
 	private final EntityMapper entityMapper;
 
 	@Override
-	public Optional<InvoiceVO> invoiceIdGet(String id) {
+	public Optional<InvoiceVO> getInvoiceById(String id) {
 		return invoiceRepository.getInvoice(URI.create(id)).map(entityMapper::invoiceToInvoiceVO);
 	}
 
 	@Override
-	public Optional<byte[]> invoiceIdPdfGet(String id) {
+	public Optional<List<InvoiceVO>> getInvoices() {
+		return Optional.of(invoiceRepository.getInvoices().stream().map(entityMapper::invoiceToInvoiceVO).collect(Collectors.toList()));
+
+	}
+
+	@Override
+	public Optional<byte[]> retrieveInvoicePdf(String id) {
 		return pdfInvoiceRepository.getPdfInvoice(id);
 	}
 
 	@Override
-	public void invoiceIdPdfPost(String id, byte[] body) {
+	public void uploadInvoicePdf(String id, byte[] body) {
 		pdfInvoiceRepository.storePdfInvoice(id, body);
 	}
+
 }
