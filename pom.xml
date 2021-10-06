@@ -518,6 +518,7 @@
                 <configuration>
                     <to>
                         <image>${image.registry}${image.repository}/${artifactId}:${image.tag}</image>
+                        <image>${image.registry}${image.repository}/${artifactId}:latest</image>
                     </to>
                     <container>
                         <labels>
