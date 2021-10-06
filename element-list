@@ -1,0 +1,16 @@
+org.fiware.broker.api
+org.fiware.broker.model
+org.fiware.contract
+org.fiware.contract.api
+org.fiware.contract.configuration
+org.fiware.contract.mapping
+org.fiware.contract.model
+org.fiware.contract.payment
+org.fiware.contract.payment.model
+org.fiware.contract.repository
+org.fiware.contract.rest
+org.fiware.contract.service
+org.fiware.dn.api
+org.fiware.dn.model
+org.fiware.perseo.api
+org.fiware.perseo.model
