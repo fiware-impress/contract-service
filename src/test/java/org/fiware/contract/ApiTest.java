@@ -9,7 +9,9 @@ import org.fiware.broker.model.EndpointVO;
 import org.fiware.broker.model.EntityFragmentVO;
 import org.fiware.broker.model.EntityInfoVO;
 import org.fiware.broker.model.EntityVO;
+import org.fiware.broker.model.GeoPropertyVO;
 import org.fiware.broker.model.NotificationParamsVO;
+import org.fiware.broker.model.PointVO;
 import org.fiware.broker.model.PropertyVO;
 import org.fiware.broker.model.SubscriptionVO;
 import org.fiware.contract.api.OfferApiTestClient;
@@ -57,11 +59,20 @@ public abstract class ApiTest {
 				.type(PropertyVO.Type.PROPERTY)
 				.value(10);
 
+		PointVO pointVO = new PointVO();
+		pointVO.type(PointVO.Type.POINT);
+		pointVO.coordinates().add(51.24752);
+		pointVO.coordinates().add(13.87789);
+
+		GeoPropertyVO locationProperty = new GeoPropertyVO()
+				.type(GeoPropertyVO.Type.GEOPROPERTY)
+				.value(pointVO);
+
 		EntityVO testEntity = new EntityVO()
 				.atContext(CORE_CONTEXT)
 				.id(URI.create("urn:ngsi-ld:crane:my-test-entity"))
 				.type("Crane")
-				.location(null)
+				.location(locationProperty)
 				.observationSpace(null)
 				.operationSpace(null)
 				.setAdditionalProperties("currentUsage", usageProperty);
