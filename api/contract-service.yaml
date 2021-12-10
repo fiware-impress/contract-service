@@ -392,6 +392,8 @@ components:
           type: string
         serviceType:
           type: string
+        visibleName:
+          type: string
         priceDefinitions:
           type: array
           items:
