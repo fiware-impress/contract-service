@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -67,6 +68,12 @@ public abstract class ApiTest {
 		GeoPropertyVO locationProperty = new GeoPropertyVO()
 				.type(GeoPropertyVO.Type.GEOPROPERTY)
 				.value(pointVO);
+		PropertyVO modelPropertyVO = new PropertyVO()
+				.type(PropertyVO.Type.PROPERTY)
+				.value("Euro SSG 130");
+		PropertyVO inUseProperty = new PropertyVO()
+				.type(PropertyVO.Type.PROPERTY)
+				.value(true);
 
 		EntityVO testEntity = new EntityVO()
 				.atContext(CORE_CONTEXT)
@@ -75,7 +82,7 @@ public abstract class ApiTest {
 				.location(locationProperty)
 				.observationSpace(null)
 				.operationSpace(null)
-				.setAdditionalProperties("currentUsage", usageProperty);
+				.setAdditionalProperties(Map.of("currentUsage", usageProperty, "model", modelPropertyVO, "inUse", inUseProperty));
 
 		testThingRepository.createThing(testEntity);
 
@@ -194,12 +201,13 @@ public abstract class ApiTest {
 		PropertyVO updateUsageProperty = new PropertyVO()
 				.type(PropertyVO.Type.PROPERTY)
 				.value(value);
+
 		EntityFragmentVO fragmentVO = new EntityFragmentVO()
 				.atContext(CORE_CONTEXT)
 				.location(null)
 				.observationSpace(null)
 				.operationSpace(null)
-				.setAdditionalProperties("currentUsage", updateUsageProperty);
+				.setAdditionalProperties(Map.of("currentUsage", updateUsageProperty));
 
 		testThingRepository.updateProperty(URI.create("urn:ngsi-ld:crane:my-test-entity"), fragmentVO);
 	}

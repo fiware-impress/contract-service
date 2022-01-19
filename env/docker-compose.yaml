@@ -74,7 +74,7 @@ services:
     depends_on:
       - mongo-db
       - perseo-core
-      -
+
   timescale:
     image: timescale/timescaledb-postgis:1.7.5-pg12
     hostname: timescale
