@@ -349,6 +349,20 @@ components:
           type: string
         streetAddress:
           type: string
+        bankAccount:
+          $ref: '#/components/schemas/BankAccount'
+    BankAccount:
+      type: object
+      description: 'Information about the bank account.'
+      properties:
+        id:
+          type: string
+          description: "The bank account number associated to this account."
+        routingNumber:
+          type: string
+          description: "The routing number for the used bank."
+        brand:
+          $ref: '#/components/schemas/Organization'
     Provider:
       type: object
       description: 'A certain measurement provider'
@@ -495,4 +509,6 @@ components:
         currency:
           type: string
         amount:
+          type: number
+        taxPercentage:
           type: number
