@@ -32,7 +32,7 @@ public class MeasurementPointRepository extends BrokerBaseRepository {
 	public MeasurementPoint getMeasurementPointById(URI id) {
 
 		return entitiesApi
-				.retrieveEntityById(generalProperties.getTenant(), id, null, null, null, getLinkHeader())
+				.retrieveEntityById(id, generalProperties.getTenant(), null, null, null, getLinkHeader())
 				.getBody()
 				.map(entityVO -> entityMapper.entityVoToMeasurementPoint(entityVO, thingRepository))
 				.orElseThrow(() -> new RuntimeException("No such measurementpoint exists."));
@@ -40,7 +40,7 @@ public class MeasurementPointRepository extends BrokerBaseRepository {
 
 	public URI createMeasurementPoint(MeasurementPoint measurementPoint) {
 		EntityVO measurementPointEntityVO = entityMapper.measurementPointToEntityVO(measurementPoint, generalProperties.getContextUrl());
-		HttpResponse<Object> response = entitiesApi.createEntity(generalProperties.getTenant(), measurementPointEntityVO);
+		HttpResponse<Object> response = entitiesApi.createEntity(measurementPointEntityVO, generalProperties.getTenant());
 		return URI.create(IdHelper.getIdFromIdentifier(URI.create(response.getHeaders().get("Location"))));
 	}
 

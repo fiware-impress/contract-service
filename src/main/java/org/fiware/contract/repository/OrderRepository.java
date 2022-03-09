@@ -30,14 +30,14 @@ public class OrderRepository extends BrokerBaseRepository {
 	public Optional<Order> getOrderById(URI id) {
 
 		return entitiesApi
-				.retrieveEntityById(generalProperties.getTenant(), id, null, null, null, getLinkHeader())
+				.retrieveEntityById(id, generalProperties.getTenant(), null, null, null, getLinkHeader())
 				.getBody()
 				.map(entityVO -> entityMapper.entityVoToOrder(entityVO, organizationRepository, offerRepository));
 	}
 
 	public URI createOrder(Order order) {
 		EntityVO orderEntityVo = entityMapper.orderToEntityVo(order, generalProperties.getContextUrl());
-		HttpResponse<Object> response = entitiesApi.createEntity(generalProperties.getTenant(), orderEntityVo);
+		HttpResponse<Object> response = entitiesApi.createEntity(orderEntityVo, generalProperties.getTenant());
 		return URI.create(IdHelper.getIdFromIdentifier(URI.create(response.getHeaders().get("Location"))));
 	}
 

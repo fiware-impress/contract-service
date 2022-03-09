@@ -1172,7 +1172,7 @@ components:
       schema:
         type: string
         default: "orion"
-      required: true
+      required: false
     coordinates:
       name: coordinates
       description: Coordinates serialized as a string

@@ -178,7 +178,7 @@ public abstract class ApiTest {
 		assertNotNull(locationHeaderOrder, "A location header should have been returned.");
 		assertFalse(locationHeaderOrder.isEmpty(), "The location header should contain an id.");
 
-		HttpResponse<Object> subscriptionCreationResponse = subscriptionsApiClient.createSubscription(generalProperties.getTenant(), new SubscriptionVO()
+		HttpResponse<Object> subscriptionCreationResponse = subscriptionsApiClient.createSubscription(new SubscriptionVO()
 				.atContext(CORE_CONTEXT)
 				.type(SubscriptionVO.Type.SUBSCRIPTION)
 				.entities(List.of(new EntityInfoVO().type("Crane")))
@@ -187,7 +187,7 @@ public abstract class ApiTest {
 						.endpoint(new EndpointVO()
 								.uri(URI.create("http://perseo-fe:9090/notices"))
 						)
-				)
+				), generalProperties.getTenant()
 		);
 		assertEquals(HttpStatus.CREATED, subscriptionCreationResponse.getStatus(), "The subscription should have been created.");
 

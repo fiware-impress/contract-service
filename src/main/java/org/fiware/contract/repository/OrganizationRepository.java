@@ -25,7 +25,7 @@ public class OrganizationRepository extends BrokerBaseRepository {
 	public Organization getOrganizationById(URI id) {
 
 		return entitiesApi
-				.retrieveEntityById(generalProperties.getTenant(), id, null, null, null, getLinkHeader())
+				.retrieveEntityById(id, generalProperties.getTenant(), null, null, null, getLinkHeader())
 				.getBody()
 				.map(entityMapper::entityVoToOrganization)
 				.orElseThrow(() -> new RuntimeException("No such organization exists."));
@@ -33,7 +33,7 @@ public class OrganizationRepository extends BrokerBaseRepository {
 
 	public URI createOrganization(Organization organization) {
 		EntityVO organizationEntityVO = entityMapper.organizationToEntityVO(generalProperties.getContextUrl(), organization);
-		HttpResponse<Object> response = entitiesApi.createEntity(generalProperties.getTenant(), organizationEntityVO);
+		HttpResponse<Object> response = entitiesApi.createEntity(organizationEntityVO, generalProperties.getTenant());
 		return URI.create(IdHelper.getIdFromIdentifier(URI.create(response.getHeaders().get("Location"))));
 	}
 
