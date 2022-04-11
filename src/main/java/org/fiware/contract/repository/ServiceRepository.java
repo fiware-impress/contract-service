@@ -27,7 +27,7 @@ public class ServiceRepository extends BrokerBaseRepository {
 
 	public URI createService(SmartService smartService) {
 		EntityVO serviceEntity = entityMapper.smartServiceToEntityVO(smartService, generalProperties.getContextUrl());
-		HttpResponse<Object> response = entitiesApi.createEntity(generalProperties.getTenant(), serviceEntity);
+		HttpResponse<Object> response = entitiesApi.createEntity(serviceEntity, generalProperties.getTenant());
 		return URI.create(IdHelper.getIdFromIdentifier(URI.create(response.getHeaders().get("Location"))));
 	}
 
@@ -45,7 +45,7 @@ public class ServiceRepository extends BrokerBaseRepository {
 
 	public Optional<SmartService> getService(URI serviceId) {
 		return entitiesApi
-				.retrieveEntityById(generalProperties.getTenant(), serviceId, null, null, null, getLinkHeader())
+				.retrieveEntityById(serviceId, generalProperties.getTenant(), null, null, null, getLinkHeader())
 				.getBody()
 				.map(entityVO -> entityMapper.entityVoToSmartService(entityVO, priceDefinitionRepository));
 	}

@@ -12,6 +12,12 @@ micronaut:
         step: PT2s
         descriptions: false
 
+  caches:
+    orders:
+      maximumSize: 100
+    organizations:
+      maximumSize: 100
+
   http:
     client:
       read-timeout: 30s
@@ -24,6 +30,10 @@ micronaut:
       perseo:
         path: /
         url: http://localhost:9090
+        read-timeout: 30
+      dn:
+        path: /
+        url: http://localhost:5001
         read-timeout: 30
 
 ---
@@ -42,9 +52,9 @@ loggers:
           client: TRACE
 ---
 general:
+  serviceBaseAddress: http://localhost:8080
   contextUrl: https://smartdatamodels.org/context.jsonld
   contractServiceCallbackUrl: http://localhost:8080/callback
   tenant: impress
-
 local:
   enabled: true

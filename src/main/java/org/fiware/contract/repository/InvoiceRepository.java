@@ -1,5 +1,6 @@
 package org.fiware.contract.repository;
 
+import io.micronaut.cache.annotation.Cacheable;
 import io.micronaut.http.HttpResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.fiware.broker.api.EntitiesApiClient;
@@ -31,7 +32,7 @@ public class InvoiceRepository extends BrokerBaseRepository {
 
 	public URI createInvoice(Invoice invoice) {
 		EntityVO invoiceEntity = entityMapper.invoiceToEntityVO(generalProperties.getContextUrl(), invoice);
-		HttpResponse<Object> response = entitiesApi.createEntity(generalProperties.getTenant(), invoiceEntity);
+		HttpResponse<Object> response = entitiesApi.createEntity(invoiceEntity, generalProperties.getTenant());
 		return URI.create(IdHelper.getIdFromIdentifier(URI.create(response.getHeaders().get("Location"))));
 	}
 
@@ -47,9 +48,10 @@ public class InvoiceRepository extends BrokerBaseRepository {
 		return invoiceList;
 	}
 
+	@Cacheable
 	public Optional<Invoice> getInvoice(URI invoiceId) {
 		return entitiesApi
-				.retrieveEntityById(generalProperties.getTenant(), invoiceId, null, null, null, getLinkHeader())
+				.retrieveEntityById(invoiceId, generalProperties.getTenant(), null, null, null, getLinkHeader())
 				.getBody()
 				.map(entityVO -> entityMapper.entityVoToInvoice(entityVO, organizationRepository, orderRepository));
 	}

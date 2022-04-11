@@ -17,6 +17,6 @@ public class LocalDiscProperties {
 	/**
 	 * The folder to store the pdfs at.
 	 */
-	private String pdfFolder = "/ld-contexts";
+	private String pdfFolder = "/invoices";
 
 }

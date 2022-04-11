@@ -9,4 +9,5 @@ public class Organization extends Thing {
 
 	private ContactPoint contactPoint;
 	private PostalAddress address;
+	private BankAccount bankAccount;
 }
