@@ -163,6 +163,10 @@ public interface EntityMapper {
 		postalAddress.setPostalCode(organizationVO.getPostalCode());
 		postalAddress.setPostOfficeBoxNumber(organizationVO.getPostOfficeBoxNumber());
 		postalAddress.setStreetAddress(organizationVO.getStreetAddress());
+
+		BankAccount bankAccount = map(organizationVO.getBankAccount());
+
+		organization.setBankAccount(bankAccount);
 		organization.setAddress(postalAddress);
 
 		return organization;
@@ -189,6 +193,9 @@ public interface EntityMapper {
 		organizationVO.setPostalCode(postalAddress.getPostalCode());
 		organizationVO.setPostOfficeBoxNumber(postalAddress.getPostOfficeBoxNumber());
 		organizationVO.setStreetAddress(postalAddress.getStreetAddress());
+
+		BankAccountVO bankAccountVO = map(organization.getBankAccount());
+		organizationVO.setBankAccount(bankAccountVO);
 
 		return organizationVO;
 	}
