@@ -19,7 +19,7 @@ public class ThingRepository extends BrokerBaseRepository {
 
 	public Optional<Thing> getThingById(URI thingId) {
 		return entitiesApi
-				.retrieveEntityById(generalProperties.getTenant(), thingId, null, null, null, getLinkHeader())
+				.retrieveEntityById(thingId, generalProperties.getTenant(), null, null, null, getLinkHeader())
 				.getBody()
 				.map(entityVO -> entityMapper.entityVoToThing(entityVO));
 	}

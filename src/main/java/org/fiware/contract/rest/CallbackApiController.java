@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.fiware.contract.IdHelper;
 import org.fiware.contract.api.PerseoCallbackApi;
+import org.fiware.contract.configuration.GeneralProperties;
 import org.fiware.contract.model.CallbackInformationVO;
 import org.fiware.contract.model.Invoice;
 import org.fiware.contract.model.MonetaryAmount;
@@ -12,10 +13,15 @@ import org.fiware.contract.model.Order;
 import org.fiware.contract.model.PaymentMethod;
 import org.fiware.contract.model.PaymentStatus;
 import org.fiware.contract.model.PriceDefinition;
+import org.fiware.contract.payment.PaymentService;
+import org.fiware.contract.payment.model.CreatePaymentData;
+import org.fiware.contract.payment.model.InvoiceData;
 import org.fiware.contract.repository.InvoiceRepository;
 import org.fiware.contract.repository.OrderRepository;
 
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -29,8 +35,10 @@ import java.util.UUID;
 @Controller
 public class CallbackApiController implements PerseoCallbackApi {
 
+	private final GeneralProperties generalProperties;
 	private final OrderRepository orderRepository;
 	private final InvoiceRepository invoiceRepository;
+	private final PaymentService paymentService;
 	private final Clock clock;
 
 
@@ -44,9 +52,12 @@ public class CallbackApiController implements PerseoCallbackApi {
 				.stream()
 				.filter(pd -> pd.getIdentifier().toString().equals(callbackInformationVO.getPriceDefinitionId()))
 				.findAny().orElseThrow(() -> new RuntimeException((String.format("Was not able to find price definition %s for order %s.", callbackInformationVO.getPriceDefinitionId(), orderId))));
+
+		URI invoiceID = IdHelper.getUriFromId("invoice", UUID.randomUUID().toString());
+
 		Invoice invoice = new Invoice();
-		invoice.setIdentifier(IdHelper.getUriFromId("invoice", UUID.randomUUID().toString()));
-		invoice.setAccountId(order.getCustomer().getIdentifier().toString());
+		invoice.setIdentifier(invoiceID);
+		invoice.setAccountId(orderId.toString());
 		invoice.setConfirmationNumber(order.getConfirmationNumber());
 		invoice.setPaymentDueDate(clock.instant().plus(Duration.of(7, ChronoUnit.DAYS)));
 		invoice.setPaymentMethod(PaymentMethod.BY_INVOICE);
@@ -54,12 +65,24 @@ public class CallbackApiController implements PerseoCallbackApi {
 		invoice.setProducer(order.getSeller());
 		invoice.setCustomer(order.getCustomer());
 		invoice.setReferencesOrder(List.of(order));
+
 		MonetaryAmount monetaryAmount = new MonetaryAmount();
 		monetaryAmount.setCurrency(priceDefinition.getPriceCurrency());
 		monetaryAmount.setValue(priceDefinition.getPrice());
 		invoice.setTotalPaymentDue(monetaryAmount);
 
 		invoiceRepository.createInvoice(invoice);
+
+		InvoiceData invoiceData = new InvoiceData(invoiceID.toString(), generateUploadUrl(invoiceID.toString()));
+		paymentService.createInvoice(invoiceData);
 		log.info("Received callback: {}", callbackInformationVO);
+	}
+
+	private URL generateUploadUrl(String invoiceId) {
+		try {
+			return new URL(String.format("%s/invoice/%s/pdf", generalProperties.getServiceBaseAddress(), invoiceId));
+		} catch (MalformedURLException e) {
+			throw new RuntimeException("Was not able to generate the upload url.", e);
+		}
 	}
 }

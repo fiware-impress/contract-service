@@ -13,6 +13,7 @@ public class Invoice extends Thing {
 
 	private Instant paymentDueDate;
 	private Instant creationDate;
+	private Double taxPercentage = 19d;
 	private PaymentMethod paymentMethod;
 	private String paymentMethodId;
 

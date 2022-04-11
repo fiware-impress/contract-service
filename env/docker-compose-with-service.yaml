@@ -58,7 +58,8 @@ services:
       - mongo-db
 
   perseo-fe:
-    image: fiware/perseo
+    image: fiware/perseo:1.17.0
+    restart: always
     networks:
       - default
     expose:
@@ -95,7 +96,7 @@ services:
       - default
 
   contract-service:
-    image: quay.io/wi_stefan/contract-service
+    image: wi_stefan/contract-service:local
     hostname: contract-service
     depends_on:
       - orion-ld
@@ -106,9 +107,12 @@ services:
     environment:
       - MICRONAUT_HTTP_SERVICES_BROKER_URL=http://orion-ld:1026
       - MICRONAUT_HTTP_SERVICES_PERSEO_URL=http://perseo-fe:9090
+      - MICRONAUT_HTTP_SERVICES_DN_URL=http://df:5001
       - GENERAL_CONTRACT_SERVICE_CALLBACK_URL=http://contract-service:8080/callback
     networks:
       - default
+    volumes:
+      - invoices:/invoices
 
   # timeseries api
   mintaka:
@@ -126,5 +130,18 @@ services:
     networks:
       - default
 
+  df:
+    image: dn-1
+    hostname: df
+    ports:
+      - "5001:5001"
+    environment:
+      - SERVER_PORT=5001
+      - CONTRACT_SERVICEPORT=8080
+      - CONTRACT_SERVICE_ADDRESS=http://contract-service
+    networks:
+      - default
+
 volumes:
   mongo-db: ~
+  invoices: ~

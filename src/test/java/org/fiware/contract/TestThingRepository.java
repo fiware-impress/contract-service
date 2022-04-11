@@ -21,13 +21,13 @@ public class TestThingRepository extends BrokerBaseRepository {
 
 
 	public URI createThing(EntityVO entityVO) {
-		HttpResponse<Object> response = entitiesApi.createEntity(generalProperties.getTenant(), entityVO);
+		HttpResponse<Object> response = entitiesApi.createEntity(entityVO, generalProperties.getTenant());
 		return URI.create(IdHelper.getIdFromIdentifier(URI.create(response.getHeaders().get("Location"))));
 	}
 
 
 	public void updateProperty(URI entityId, EntityFragmentVO fragmentVO) {
-		entitiesApi.updateEntityAttrs(generalProperties.getTenant(), entityId, fragmentVO);
+		entitiesApi.updateEntityAttrs(entityId, fragmentVO, generalProperties.getTenant());
 	}
 
 }

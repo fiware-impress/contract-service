@@ -1,48 +1,81 @@
 package org.fiware.contract.payment;
 
 import lombok.RequiredArgsConstructor;
-import org.fiware.contract.payment.model.ActivatePaymentCommand;
 import org.fiware.contract.payment.model.ActivatePaymentData;
-import org.fiware.contract.payment.model.AuthorizePaymentCommand;
 import org.fiware.contract.payment.model.AuthorizePaymentData;
-import org.fiware.contract.payment.model.Command;
-import org.fiware.contract.payment.model.CreateInvoiceCommand;
-import org.fiware.contract.payment.model.CreatePaymentCommand;
 import org.fiware.contract.payment.model.CreatePaymentData;
 import org.fiware.contract.payment.model.InvoiceData;
-import org.fiware.dn.api.DefaultApi;
-import org.fiware.dn.model.CommandVO;
+import org.fiware.dn.api.PaymentsApi;
+import org.fiware.dn.model.InvoiceCommandVO;
+import org.fiware.dn.model.PaymentCommandDataVO;
+import org.fiware.dn.model.PaymentCommandPropertiesVO;
+import org.fiware.dn.model.PaymentCommandVO;
 
 import javax.inject.Singleton;
-import java.net.URL;
 
 @RequiredArgsConstructor
 @Singleton
 public class PaymentService {
 
-	private final DefaultApi defaultApi;
+	private final PaymentsApi paymentsApi;
 
 	public void activatePaymentGuard(ActivatePaymentData activatePaymentData) {
-		defaultApi.postPayment(commandToCommandVO(new ActivatePaymentCommand(activatePaymentData)));
+
+		PaymentCommandVO paymentCommandVO = new PaymentCommandVO();
+		paymentCommandVO.setCommand("activatePaymentGuard");
+
+		PaymentCommandDataVO paymentCommandDataVO = new PaymentCommandDataVO();
+		paymentCommandDataVO.setObjectDataID(activatePaymentData.getInvoiceDataId());
+		paymentCommandDataVO.setConfirmationURL(activatePaymentData.getConfirmationUrl().toString());
+		paymentCommandDataVO.setLegitimationKey(activatePaymentData.getLegitimationKey());
+		paymentCommandVO.setData(paymentCommandDataVO);
+
+		paymentsApi.postPayment(paymentCommandVO);
 	}
 
 	public void createInvoice(InvoiceData invoiceData) {
-		defaultApi.postPayment(commandToCommandVO(new CreateInvoiceCommand(invoiceData)));
+		InvoiceCommandVO invoiceCommandVO = new InvoiceCommandVO();
+		invoiceCommandVO.setCommand("createInvoice");
+
+		PaymentCommandDataVO paymentCommandDataVO = new PaymentCommandDataVO();
+		paymentCommandDataVO.setConfirmationURL(invoiceData.getUploadUrl().toString());
+		paymentCommandDataVO.setObjectDataID(invoiceData.getInvoiceDataId());
+		invoiceCommandVO.setData(paymentCommandDataVO);
+
+		PaymentCommandPropertiesVO paymentCommandPropertiesVO = new PaymentCommandPropertiesVO();
+		paymentCommandPropertiesVO.setWithAuthorization(true);
+		invoiceCommandVO.setProperties(paymentCommandPropertiesVO);
+
+		paymentsApi.postInvoice(invoiceCommandVO);
 	}
 
 	public void createPayment(CreatePaymentData createPaymentData) {
-		defaultApi.postPayment(commandToCommandVO(new CreatePaymentCommand(createPaymentData)));
+		PaymentCommandVO paymentCommandVO = new PaymentCommandVO();
+		paymentCommandVO.setCommand("createPayment");
+
+		PaymentCommandDataVO paymentCommandDataVO = new PaymentCommandDataVO();
+		paymentCommandDataVO.setObjectDataID(createPaymentData.getPaymentDataId());
+		paymentCommandDataVO.setConfirmationURL(createPaymentData.getConfirmationUrl().toString());
+		paymentCommandVO.setData(paymentCommandDataVO);
+
+		PaymentCommandPropertiesVO paymentCommandPropertiesVO = new PaymentCommandPropertiesVO();
+		paymentCommandPropertiesVO.setWithAuthorization(false);
+		paymentCommandVO.setProperties(paymentCommandPropertiesVO);
+
+		paymentsApi.postPayment(paymentCommandVO);
 	}
 
 	public void authorizePayment(AuthorizePaymentData authorizePaymentData) {
-		defaultApi.postPayment(commandToCommandVO(new AuthorizePaymentCommand(authorizePaymentData)));
+		PaymentCommandVO paymentCommandVO =new PaymentCommandVO();
+		paymentCommandVO.setCommand("authorizePayment");
+
+		PaymentCommandDataVO paymentCommandDataVO = new PaymentCommandDataVO();
+		paymentCommandDataVO.setObjectDataID(authorizePaymentData.getPaymentDataId());
+		paymentCommandDataVO.setConfirmationURL(authorizePaymentData.getConfirmationURL().toString());
+		paymentCommandDataVO.setLegitimationKey(authorizePaymentData.getLegitimationKey());
+		paymentCommandVO.setData(paymentCommandDataVO);
+
+		paymentsApi.postPayment(paymentCommandVO);
 	}
 
-	private CommandVO commandToCommandVO(Command command) {
-		CommandVO commandVo = new CommandVO();
-		commandVo.setCommand(command.getCommand());
-		commandVo.setProperties(command.getProperties());
-		commandVo.setData(command.getData());
-		return commandVo;
-	}
 }

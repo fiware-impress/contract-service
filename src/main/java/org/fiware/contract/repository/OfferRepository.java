@@ -31,7 +31,7 @@ public class OfferRepository extends BrokerBaseRepository {
 
 	public URI createOffer(Offer offer) {
 		EntityVO offerEntity = entityMapper.offerToEntityVO(generalProperties.getContextUrl(), offer);
-		HttpResponse<Object> response = entitiesApi.createEntity(generalProperties.getTenant(), offerEntity);
+		HttpResponse<Object> response = entitiesApi.createEntity(offerEntity, generalProperties.getTenant());
 		return URI.create(IdHelper.getIdFromIdentifier(URI.create(response.getHeaders().get("Location"))));
 	}
 
@@ -40,7 +40,7 @@ public class OfferRepository extends BrokerBaseRepository {
 		// ID an type cannot be updated
 		offerEntityFragmentVO.setId(null);
 		offerEntityFragmentVO.setType(null);
-		entitiesApi.appendEntityAttrs(generalProperties.getTenant(), offer.getIdentifier(), offerEntityFragmentVO, null);
+		entitiesApi.appendEntityAttrs(offer.getIdentifier(), offerEntityFragmentVO, generalProperties.getTenant(), null);
 	}
 
 	public List<Offer> getOffers() {
@@ -57,7 +57,7 @@ public class OfferRepository extends BrokerBaseRepository {
 
 	public Optional<Offer> getOffer(URI offerId) {
 		return entitiesApi
-				.retrieveEntityById(generalProperties.getTenant(), offerId, null, null, null, getLinkHeader())
+				.retrieveEntityById(offerId, generalProperties.getTenant(), null, null, null, getLinkHeader())
 				.getBody()
 				.map(entityVO -> entityMapper.entityVoToOffer(entityVO, organizationRepository, serviceRepository));
 	}

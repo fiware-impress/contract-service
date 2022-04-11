@@ -30,7 +30,7 @@ public class PriceDefinitionRepository extends BrokerBaseRepository {
 	public PriceDefinition getPriceDefinitionById(URI id) {
 
 		return entitiesApi
-				.retrieveEntityById(generalProperties.getTenant(), id, null, null, null, getLinkHeader())
+				.retrieveEntityById(id, generalProperties.getTenant(), null, null, null, getLinkHeader())
 				.getBody()
 				.map(entityVO -> entityMapper.entityVoToPriceDefinition(entityVO, measurementPointRepository))
 				.orElseThrow(() -> new RuntimeException("No such pricedefinition exists."));
@@ -38,7 +38,7 @@ public class PriceDefinitionRepository extends BrokerBaseRepository {
 
 	public URI createPriceDefinition(PriceDefinition priceDefinition) {
 		EntityVO priceDefinitionEntityVO = entityMapper.priceDefinitionToEntityVo(priceDefinition, generalProperties.getContextUrl());
-		HttpResponse<Object> response = entitiesApi.createEntity(generalProperties.getTenant(), priceDefinitionEntityVO);
+		HttpResponse<Object> response = entitiesApi.createEntity(priceDefinitionEntityVO, generalProperties.getTenant());
 		return URI.create(IdHelper.getIdFromIdentifier(URI.create(response.getHeaders().get("Location"))));
 	}
 

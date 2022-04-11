@@ -5,6 +5,7 @@ import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import lombok.RequiredArgsConstructor;
 import org.fiware.broker.api.SubscriptionsApiClient;
+import org.fiware.broker.model.EndpointReceiverInfoVO;
 import org.fiware.broker.model.EndpointVO;
 import org.fiware.broker.model.EntityFragmentVO;
 import org.fiware.broker.model.EntityInfoVO;
@@ -20,6 +21,7 @@ import org.fiware.contract.api.OrganizationApiTestClient;
 import org.fiware.contract.api.SmartServiceApiTestClient;
 import org.fiware.contract.configuration.GeneralProperties;
 import org.fiware.contract.model.AddressVO;
+import org.fiware.contract.model.BankAccountVO;
 import org.fiware.contract.model.MeasurementPointVO;
 import org.fiware.contract.model.OfferVO;
 import org.fiware.contract.model.OrderVO;
@@ -78,7 +80,7 @@ public abstract class ApiTest {
 		EntityVO testEntity = new EntityVO()
 				.atContext(CORE_CONTEXT)
 				.id(URI.create("urn:ngsi-ld:crane:my-test-entity"))
-				.type("Crane")
+				.type("crane")
 				.location(locationProperty)
 				.observationSpace(null)
 				.operationSpace(null)
@@ -96,7 +98,8 @@ public abstract class ApiTest {
 						.telephone("0351/1234567")
 						.contactType("Support")
 						.postalCode("01159")
-						.streetAddress("Bergstraße 12"));
+						.streetAddress("Bergstraße 12")
+						.bankAccount(new BankAccountVO().id("My-Bank-Account").brand("Sparkasse").routingNumber("123456789")));
 
 		assertEquals(HttpStatus.CREATED, organizationCreationResponse.getStatus(), "The organization should have been created.");
 		String locationHeaderOrg = organizationCreationResponse.getHeaders().get("Location");
@@ -113,7 +116,8 @@ public abstract class ApiTest {
 						.telephone("0351/7654321")
 						.contactType("Sales")
 						.postalCode("01159")
-						.streetAddress("Klingenbergerstr. 24"));
+						.streetAddress("Klingenbergerstr. 24")
+						.bankAccount(new BankAccountVO().id("My-Bank-Account2").brand("Sparkasse").routingNumber("987654321")));
 
 		assertEquals(HttpStatus.CREATED, customerCreationResponse.getStatus(), "The organization should have been created.");
 		String locationHeaderCustomer = customerCreationResponse.getHeaders().get("Location");
@@ -131,11 +135,11 @@ public abstract class ApiTest {
 								.priceCurrency("Euro")
 								.quantity(1000.0)
 								.measurementPoint(new MeasurementPointVO()
-										.measurementQuery("select ev.currentUsage? as CurrentValue from pattern [every ev=iotEvent(cast(cast(currentUsage?, int)%10,int)=0 and type=\"Crane\")]")
+										.measurementQuery("select ev.currentUsage? as CurrentValue from pattern [every ev=iotEvent(cast(cast(currentUsage?, int)%10,int)=0 and type=\"crane\")]")
 										.unitCode("kg/m")
 										.provider(new ProviderVO()
 												.id("urn:ngsi-ld:crane:my-test-entity")
-												.type("Crane")))))
+												.type("crane")))))
 		);
 
 		assertEquals(HttpStatus.CREATED, serviceCreationResponse.getStatus(), "The service should have been created.");
@@ -178,16 +182,17 @@ public abstract class ApiTest {
 		assertNotNull(locationHeaderOrder, "A location header should have been returned.");
 		assertFalse(locationHeaderOrder.isEmpty(), "The location header should contain an id.");
 
-		HttpResponse<Object> subscriptionCreationResponse = subscriptionsApiClient.createSubscription(generalProperties.getTenant(), new SubscriptionVO()
+		HttpResponse<Object> subscriptionCreationResponse = subscriptionsApiClient.createSubscription(new SubscriptionVO()
 				.atContext(CORE_CONTEXT)
 				.type(SubscriptionVO.Type.SUBSCRIPTION)
-				.entities(List.of(new EntityInfoVO().type("Crane")))
+				.entities(List.of(new EntityInfoVO().type("crane")))
 				.geoQ(null)
 				.notification(new NotificationParamsVO()
 						.endpoint(new EndpointVO()
 								.uri(URI.create("http://perseo-fe:9090/notices"))
+								.addReceiverInfoItem(new EndpointReceiverInfoVO().key("Fiware-Service").value("impress"))
 						)
-				)
+				), generalProperties.getTenant()
 		);
 		assertEquals(HttpStatus.CREATED, subscriptionCreationResponse.getStatus(), "The subscription should have been created.");
 

@@ -26,6 +26,11 @@ micronaut:
         path: /
         url: http://localhost:8080
         read-timeout: 30
+      dn:
+        path: /
+        url: http://df:5001
+        read-timeout: 30
+
 
 ---
 endpoints:
@@ -43,8 +48,9 @@ loggers:
           client: TRACE
 ---
 general:
+  serviceBaseAddress: http://contract-service:8080
   contextUrl: https://smartdatamodels.org/context.jsonld
-  contractServiceCallbackUrl: http://localhost:9080/callback
+  contractServiceCallbackUrl: http://contract-service:8080/callback
   tenant: impress
 
 ---
