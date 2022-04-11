@@ -55,5 +55,6 @@ general:
   serviceBaseAddress: http://localhost:8080
   contextUrl: https://smartdatamodels.org/context.jsonld
   contractServiceCallbackUrl: http://localhost:8080/callback
+  perseiUrl: http://perseo-fe:9090/notices
 local:
   enabled: true
