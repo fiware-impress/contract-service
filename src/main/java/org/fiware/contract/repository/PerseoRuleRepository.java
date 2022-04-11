@@ -57,7 +57,8 @@ public class PerseoRuleRepository {
 
 	private void createSubscription(URI measuredEntity) throws URISyntaxException {
 		EntityInfoVO entityInfoVO = new EntityInfoVO()
-				.id(measuredEntity);
+				.id(measuredEntity)
+				.type(getType(measuredEntity));
 		NotificationParamsVO notificationParamsVO = new NotificationParamsVO()
 				.endpoint(new EndpointVO()
 						.uri(generalProperties.getPerseoUrl().toURI())
@@ -68,9 +69,13 @@ public class PerseoRuleRepository {
 				.type(SubscriptionVO.Type.SUBSCRIPTION)
 				.entities(List.of(entityInfoVO))
 				.geoQ(null)
-				.isActive(true)
 				.notification(notificationParamsVO);
 		subscriptionsApiClient.createSubscription(subscriptionVO, generalProperties.getTenant());
+	}
+
+	private String getType(URI measuredEntity) {
+		String[] idParts = measuredEntity.toString().split(":");
+		return idParts[2];
 	}
 
 }
