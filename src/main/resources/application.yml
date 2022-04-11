@@ -55,6 +55,5 @@ general:
   serviceBaseAddress: http://localhost:8080
   contextUrl: https://smartdatamodels.org/context.jsonld
   contractServiceCallbackUrl: http://localhost:8080/callback
-  tenant: impress
 local:
   enabled: true
