@@ -1,5 +1,7 @@
 package org.fiware.contract.repository;
 
+import io.micronaut.cache.annotation.CachePut;
+import io.micronaut.cache.annotation.Cacheable;
 import io.micronaut.http.HttpResponse;
 import org.fiware.broker.api.EntitiesApiClient;
 import org.fiware.broker.model.EntityListVO;
@@ -22,6 +24,7 @@ public class OrganizationRepository extends BrokerBaseRepository {
 		super(generalProperties, entityMapper, entitiesApi);
 	}
 
+	@Cacheable("organizations")
 	public Organization getOrganizationById(URI id) {
 
 		return entitiesApi
@@ -31,6 +34,7 @@ public class OrganizationRepository extends BrokerBaseRepository {
 				.orElseThrow(() -> new RuntimeException("No such organization exists."));
 	}
 
+	@CachePut(cacheNames = "organizations", keyGenerator = ThingIdKeyGenerator.class)
 	public URI createOrganization(Organization organization) {
 		EntityVO organizationEntityVO = entityMapper.organizationToEntityVO(generalProperties.getContextUrl(), organization);
 		HttpResponse<Object> response = entitiesApi.createEntity(organizationEntityVO, generalProperties.getTenant());

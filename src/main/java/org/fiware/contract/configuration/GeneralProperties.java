@@ -13,6 +13,11 @@ import java.net.URL;
 public class GeneralProperties {
 
 	/**
+	 * Base address of the context service. Will be used to create the upload url.
+	 */
+	private String serviceBaseAddress;
+
+	/**
 	 * ContextUrl for the service to use.
 	 */
 	private URL contextUrl;

@@ -96,5 +96,18 @@ services:
     networks:
       - default
 
+  df:
+    image: df
+    hostname: df
+    ports:
+      - "5001:5001"
+    environment:
+      - SERVER_PORT=5001
+      - CONTRACT_SERVICEPORT=9080
+      - CONTRACT_SERVICE_ADDRESS=http://localhost
+      -
+    networks:
+      - default
+
 volumes:
   mongo-db: ~

@@ -1757,6 +1757,15 @@ components:
           type: string
           enum:
             - application/ld+json
+        receiverInfo:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              value:
+                type: string
     NotificationParams:
       type: object
       properties:

@@ -1,35 +1,96 @@
-openapi: 3.0.3
+swagger: "2.0"
 info:
-  description: 'The spec describes the so-called API for the DN payment service'
-  version: latest
-  title: DN Payment API
-  contact:
-    email: stefan.wiedemann@fiware.org
+  description: Smart Contract API description of the first prototype of SCP
+  version: "1.0.0"
+  title: Swagger ReST Article
+consumes:
+  - application/json
+produces:
+  - application/json
 
+# Paths supported by the server application
 paths:
-  '/api/payment':
-    post:
-      description: Post payment.
-      operationId: post payment
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Command'
-      responses:
-        '204':
-          description: Successfully did something in regards of payment
 
-components:
-  schemas:
-    Command:
-      type: object
-      description: The so called command.
+  /api/invoice:
+    post:
+      operationId: postInvoice
+      tags:
+        - payments
+      summary: Create a payment and add it to the payment list
+      description: Create a new payment in the payment list
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: requestData
+          in: body
+          required: True
+          schema:
+            $ref: '#/definitions/InvoiceCommand'
+
+      responses:
+        201:
+          description: Successfully created payment in list
+
+  /api/payment:
+    post:
+      operationId: postPayment
+      tags:
+        - payments
+      summary: Create a payment and add it to the payment list
+      description: Create a new payment in the payment list
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: requestData
+          in: body
+          required: True
+          schema:
+            $ref: '#/definitions/PaymentCommand'
+
+      responses:
+        201:
+          description: Successfully created payment in list
+
+definitions:
+  PaymentCommand:
+    type: object
+    properties:
+      command:
+        type: string
       properties:
-        command:
-          type: string
+        type: object
         properties:
-          type: object
-        Data:
-          type: object
+          withAuthorization:
+            type: boolean
+      data:
+        type: object
+        properties:
+          objectDataID:
+            type: string
+          legitimationKey:
+            type: string
+          confirmationURL:
+            type: string
+  InvoiceCommand:
+    type: object
+    properties:
+      command:
+        type: string
+      properties:
+        type: object
+        properties:
+          withAuthorization:
+            type: boolean
+      data:
+        type: object
+        properties:
+          objectDataID:
+            type: string
+          legitimationKey:
+            type: string
+          confirmationURL:
+            type: string

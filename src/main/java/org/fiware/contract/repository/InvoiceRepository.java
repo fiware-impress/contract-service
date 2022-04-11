@@ -1,5 +1,6 @@
 package org.fiware.contract.repository;
 
+import io.micronaut.cache.annotation.Cacheable;
 import io.micronaut.http.HttpResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.fiware.broker.api.EntitiesApiClient;
@@ -47,6 +48,7 @@ public class InvoiceRepository extends BrokerBaseRepository {
 		return invoiceList;
 	}
 
+	@Cacheable
 	public Optional<Invoice> getInvoice(URI invoiceId) {
 		return entitiesApi
 				.retrieveEntityById(invoiceId, generalProperties.getTenant(), null, null, null, getLinkHeader())

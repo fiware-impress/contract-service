@@ -362,7 +362,7 @@ components:
           type: string
           description: "The routing number for the used bank."
         brand:
-          $ref: '#/components/schemas/Organization'
+          type: string
     Provider:
       type: object
       description: 'A certain measurement provider'

@@ -9,6 +9,8 @@ import org.fiware.broker.model.PropertyVO;
 import org.fiware.broker.model.RelationshipVO;
 import org.fiware.contract.IdHelper;
 import org.fiware.contract.model.AddressVO;
+import org.fiware.contract.model.BankAccount;
+import org.fiware.contract.model.BankAccountVO;
 import org.fiware.contract.model.ContactPoint;
 import org.fiware.contract.model.Invoice;
 import org.fiware.contract.model.InvoiceVO;
@@ -37,6 +39,8 @@ import org.fiware.contract.repository.PriceDefinitionRepository;
 import org.fiware.contract.repository.ServiceRepository;
 import org.fiware.contract.repository.ThingRepository;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 
 import java.net.URI;
 import java.net.URL;
@@ -135,6 +139,7 @@ public interface EntityMapper {
 		organization.setIdentifier(entityVO.getId());
 		organization.setAddress(OBJECT_MAPPER.convertValue(((Map) additionalProperties.get("address")).get("value"), PostalAddress.class));
 		organization.setContactPoint(OBJECT_MAPPER.convertValue(((Map) additionalProperties.get("contactPoint")).get("value"), ContactPoint.class));
+		organization.setBankAccount(OBJECT_MAPPER.convertValue(((Map) additionalProperties.get("bankAccount")).get("value"), BankAccount.class));
 		organization.setLegalName((String) ((Map) additionalProperties.get("legalName")).get("value"));
 
 		return organization;
@@ -162,6 +167,10 @@ public interface EntityMapper {
 
 		return organization;
 	}
+
+	BankAccount map(BankAccountVO bankAccountVO);
+
+	BankAccountVO map(BankAccount bankAccount);
 
 	default OrganizationVO organizationToOrganizationVo(Organization organization) {
 		OrganizationVO organizationVO = new OrganizationVO();
@@ -392,10 +401,10 @@ public interface EntityMapper {
 		invoice.setIdentifier(entityVO.getId());
 		invoice.setAccountId((String) ((Map) additionalProperties.get("accountId")).get("value"));
 		invoice.setConfirmationNumber((String) ((Map) additionalProperties.get("confirmationNumber")).get("value"));
-		invoice.setPaymentDueDate(Instant.ofEpochSecond((Long) ((Map) additionalProperties.get("paymentDueDate")).get("value")));
+		invoice.setPaymentDueDate(Instant.ofEpochSecond(((Number) ((Map) additionalProperties.get("paymentDueDate")).get("value")).longValue()));
 		invoice.setPaymentMethod(BY_INVOICE);
 		invoice.setCreationDate(entityVO.createdAt());
-		invoice.setPaymentStatus(PaymentStatus.valueOf((String) ((Map) additionalProperties.get("paymentStatus")).get("value")));
+		invoice.setPaymentStatus(PaymentStatus.getByValue(((String) ((Map) additionalProperties.get("paymentStatus")).get("value"))));
 		String producerId = (String) ((Map) additionalProperties.get("producer")).get("object");
 		String customerId = (String) ((Map) additionalProperties.get("customer")).get("object");
 		invoice.setProducer(organizationRepository.getOrganizationById(URI.create(producerId)));
@@ -420,8 +429,16 @@ public interface EntityMapper {
 		return invoice;
 	}
 
+	@Mappings({
+			@Mapping(source = "identifier", target = "id"),
+			@Mapping(source = "referencesOrder", target = "referencesOrders"),
+			@Mapping(source = "totalPaymentDue.value", target = "amount")
+	})
 	InvoiceVO invoiceToInvoiceVO(Invoice invoice);
 
+	default String uriToString(URI uri) {
+		return uri.toString();
+	}
 
 	// MEASUREMENT POINT
 
@@ -510,6 +527,7 @@ public interface EntityMapper {
 		objectMap.put("address", asProperty(organization.getAddress()));
 		objectMap.put("contactPoint", asProperty(organization.getContactPoint()));
 		objectMap.put("legalName", asProperty(organization.getLegalName()));
+		objectMap.put("bankAccount", asProperty(organization.getBankAccount()));
 		return objectMap;
 	}
 
