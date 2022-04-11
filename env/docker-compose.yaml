@@ -2,7 +2,7 @@ version: "3.5"
 services:
   # Orion is the context broker
   orion-ld:
-    image: ${ORION_IMAGE:-fiware/orion-ld:0.9.0}
+    image: ${ORION_IMAGE:-fiware/orion-ld:1.0.1}
     hostname: orion
     # sometimes the initial startup fails due to a weird timescale behaviour
     restart: always
@@ -93,19 +93,6 @@ services:
       - "5432"
     ports:
       - "5432:5432"
-    networks:
-      - default
-
-  df:
-    image: df
-    hostname: df
-    ports:
-      - "5001:5001"
-    environment:
-      - SERVER_PORT=5001
-      - CONTRACT_SERVICEPORT=9080
-      - CONTRACT_SERVICE_ADDRESS=http://localhost
-      -
     networks:
       - default
 
