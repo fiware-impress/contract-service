@@ -4,6 +4,7 @@ import io.micronaut.http.HttpResponse;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import lombok.RequiredArgsConstructor;
+import org.fiware.broker.api.SubscriptionsApiClient;
 import org.fiware.contract.model.ItemAvailability;
 import org.fiware.contract.model.Offer;
 import org.fiware.contract.model.Order;
@@ -44,7 +45,8 @@ public class OrderService {
 					ruleRepository.createRule(
 							orderURI.toString(),
 							priceDefinition.getIdentifier().toString(),
-							priceDefinition.getMeasurementPoint().getMeasurementQuery());
+							priceDefinition.getMeasurementPoint().getMeasurementQuery(),
+							priceDefinition.getMeasurementPoint().getIdentifier());
 				});
 	}
 }
