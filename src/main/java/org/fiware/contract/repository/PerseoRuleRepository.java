@@ -64,6 +64,7 @@ public class PerseoRuleRepository {
 						.addReceiverInfoItem(new EndpointReceiverInfoVO().key("Fiware-Service").value(generalProperties.getTenant()))
 				);
 		SubscriptionVO subscriptionVO = new SubscriptionVO()
+				.atContext(generalProperties.getContextUrl())
 				.type(SubscriptionVO.Type.SUBSCRIPTION)
 				.entities(List.of(entityInfoVO))
 				.geoQ(null)
