@@ -27,6 +27,8 @@ public class GeneralProperties {
 	 */
 	private URL contractServiceCallbackUrl;
 
+	private URL perseoUrl;
+
 	/**
 	 * Tenant to be used by the contract server.
 	 */
