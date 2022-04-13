@@ -46,7 +46,7 @@ public class OrderService {
 							orderURI.toString(),
 							priceDefinition.getIdentifier().toString(),
 							priceDefinition.getMeasurementPoint().getMeasurementQuery(),
-							priceDefinition.getMeasurementPoint().getIdentifier());
+							priceDefinition.getMeasurementPoint().getProvider().getIdentifier());
 				});
 	}
 }
