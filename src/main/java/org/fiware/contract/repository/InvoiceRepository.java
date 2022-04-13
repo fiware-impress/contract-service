@@ -38,20 +38,21 @@ public class InvoiceRepository extends BrokerBaseRepository {
 
 	public List<Invoice> getInvoices() {
 		List<Invoice> invoiceList = new ArrayList<>();
-		Optional<EntityListVO> optionalEntityVOS = entitiesApi.queryEntities(generalProperties.getTenant(), null, null, "Invoice", null, null, null, null, null, null, null, null, null, getLinkHeader()).getBody();
+		Optional<EntityListVO> optionalEntityVOS = entitiesApi.queryEntities(generalProperties.getTenant(), null, null, "Invoice", null, null, null, null, null, null, null, null, "sysAttrs", getLinkHeader()).getBody();
 		if (optionalEntityVOS.isEmpty()) {
 			return List.of();
 		}
 		for (EntityVO entityVO : optionalEntityVOS.get()) {
 			invoiceList.add(entityMapper.entityVoToInvoice(entityVO, organizationRepository, orderRepository));
 		}
+		log.info("{}",invoiceList);
 		return invoiceList;
 	}
 
 	@Cacheable
 	public Optional<Invoice> getInvoice(URI invoiceId) {
 		return entitiesApi
-				.retrieveEntityById(invoiceId, generalProperties.getTenant(), null, null, null, getLinkHeader())
+				.retrieveEntityById(invoiceId, generalProperties.getTenant(), null, null, "sysAttrs", getLinkHeader())
 				.getBody()
 				.map(entityVO -> entityMapper.entityVoToInvoice(entityVO, organizationRepository, orderRepository));
 	}

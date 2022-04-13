@@ -3,6 +3,7 @@ package org.fiware.contract.repository;
 import io.micronaut.cache.annotation.CachePut;
 import io.micronaut.cache.annotation.Cacheable;
 import io.micronaut.http.HttpResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.fiware.broker.api.EntitiesApiClient;
 import org.fiware.broker.model.EntityListVO;
 import org.fiware.broker.model.EntityVO;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Singleton
 public class OrderRepository extends BrokerBaseRepository {
 
@@ -31,14 +33,13 @@ public class OrderRepository extends BrokerBaseRepository {
 
 	@Cacheable("orders")
 	public Optional<Order> getOrderById(URI id) {
-
+		log.info("Get order {}", id);
 		return entitiesApi
 				.retrieveEntityById(id, generalProperties.getTenant(), null, null, null, getLinkHeader())
 				.getBody()
 				.map(entityVO -> entityMapper.entityVoToOrder(entityVO, organizationRepository, offerRepository));
 	}
 
-	@CachePut(cacheNames = "orders", keyGenerator = ThingIdKeyGenerator.class)
 	public URI createOrder(Order order) {
 		EntityVO orderEntityVo = entityMapper.orderToEntityVo(order, generalProperties.getContextUrl());
 		HttpResponse<Object> response = entitiesApi.createEntity(orderEntityVo, generalProperties.getTenant());
