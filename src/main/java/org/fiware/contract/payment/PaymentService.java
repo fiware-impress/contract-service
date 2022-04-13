@@ -6,6 +6,7 @@ import org.fiware.contract.payment.model.AuthorizePaymentData;
 import org.fiware.contract.payment.model.CreatePaymentData;
 import org.fiware.contract.payment.model.InvoiceData;
 import org.fiware.dn.api.PaymentsApi;
+import org.fiware.dn.api.PaymentsApiClient;
 import org.fiware.dn.model.InvoiceCommandVO;
 import org.fiware.dn.model.PaymentCommandDataVO;
 import org.fiware.dn.model.PaymentCommandPropertiesVO;
@@ -17,7 +18,7 @@ import javax.inject.Singleton;
 @Singleton
 public class PaymentService {
 
-	private final PaymentsApi paymentsApi;
+	private final PaymentsApiClient paymentsApi;
 
 	public void activatePaymentGuard(ActivatePaymentData activatePaymentData) {
 

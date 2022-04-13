@@ -84,7 +84,7 @@ public abstract class ApiTest {
 				.location(locationProperty)
 				.observationSpace(null)
 				.operationSpace(null)
-				.setAdditionalProperties(Map.of("currentUsage", usageProperty, "model", modelPropertyVO, "inUse", inUseProperty));
+				.setAdditionalProperties(Map.of("currentWeight", usageProperty, "model", modelPropertyVO, "inUse", inUseProperty));
 
 		testThingRepository.createThing(testEntity);
 
@@ -135,7 +135,7 @@ public abstract class ApiTest {
 								.priceCurrency("Euro")
 								.quantity(1000.0)
 								.measurementPoint(new MeasurementPointVO()
-										.measurementQuery("select ev.currentUsage? as CurrentValue from pattern [every ev=iotEvent(cast(cast(currentUsage?, int)%10,int)=0 and type=\"crane\")]")
+										.measurementQuery("select ev.currentWeight? as CurrentValue from pattern [every ev=iotEvent(cast(cast(currentWeight?, int)%10,int)=0 and type=\"crane\")]")
 										.unitCode("kg/m")
 										.provider(new ProviderVO()
 												.id("urn:ngsi-ld:crane:my-test-entity")
@@ -198,7 +198,7 @@ public abstract class ApiTest {
 				.location(null)
 				.observationSpace(null)
 				.operationSpace(null)
-				.setAdditionalProperties(Map.of("currentUsage", updateUsageProperty));
+				.setAdditionalProperties(Map.of("currentWeight", updateUsageProperty));
 
 		testThingRepository.updateProperty(URI.create("urn:ngsi-ld:crane:my-test-entity"), fragmentVO);
 	}

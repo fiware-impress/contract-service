@@ -59,7 +59,7 @@ services:
       - mongo-db
 
   perseo-fe:
-    image: fiware/perseo
+    image: fiware/perseo:1.17.0
     networks:
       - default
     expose:

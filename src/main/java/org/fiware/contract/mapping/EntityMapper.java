@@ -28,6 +28,7 @@ import org.fiware.contract.model.PaymentStatus;
 import org.fiware.contract.model.PostalAddress;
 import org.fiware.contract.model.PriceDefinition;
 import org.fiware.contract.model.PriceDefinitionVO;
+import org.fiware.contract.model.ProviderVO;
 import org.fiware.contract.model.SmartService;
 import org.fiware.contract.model.SmartServiceVO;
 import org.fiware.contract.model.Thing;
@@ -284,6 +285,10 @@ public interface EntityMapper {
 		return measurementPoint;
 	}
 
+	default ProviderVO map(Thing thing) {
+		return new ProviderVO().type(thing.getIdentifier().toString().split(":")[2]).id(thing.getIdentifier().toString());
+	}
+
 	MeasurementPointVO measurementPointToMeasurementPointVo(MeasurementPoint measurementPoint);
 
 
@@ -439,7 +444,8 @@ public interface EntityMapper {
 	@Mappings({
 			@Mapping(source = "identifier", target = "id"),
 			@Mapping(source = "referencesOrder", target = "referencesOrders"),
-			@Mapping(source = "totalPaymentDue.value", target = "amount")
+			@Mapping(source = "totalPaymentDue.value", target = "amount"),
+			@Mapping(source = "creationDate", target = "creationDate")
 	})
 	InvoiceVO invoiceToInvoiceVO(Invoice invoice);
 
